@@ -1,0 +1,22 @@
+{
+  "name": "@church/nextjs-auth",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./provider": "./src/provider.ts"
+  },
+  "scripts": {
+    "build": "echo 'Skipping build - using raw TypeScript files'",
+    "dev": "echo 'Skipping dev - using raw TypeScript files'"
+  },
+  "dependencies": {
+    "@church/ministry-platform": "*",
+    "next-auth": "5.0.0-beta.25",
+    "next": "^15.0.0"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "@types/node": "latest"
+  }
+}

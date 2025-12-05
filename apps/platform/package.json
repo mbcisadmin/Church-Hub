@@ -1,0 +1,35 @@
+{
+  "name": "@church/apps-platform",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@church/ministry-platform": "*",
+    "@church/database": "*",
+    "@church/nextjs-auth": "*",
+    "@church/nextjs-ui": "*",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^11.15.0",
+    "next": "^15.0.0",
+    "next-pwa": "^5.6.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "^15.0.0",
+    "postcss": "^8",
+    "tailwindcss": "^4",
+    "typescript": "latest"
+  }
+}
