@@ -7,7 +7,9 @@
   "workspaces": [
     "packages/core/*",
     "packages/nextjs/*",
-    "apps/*"
+    "apps/*",
+    "microsites/*",
+    "widgets/*"
   ],
   "scripts": {
     "dev": "turbo run dev",
