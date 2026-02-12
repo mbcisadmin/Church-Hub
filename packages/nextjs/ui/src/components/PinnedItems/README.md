@@ -5,7 +5,7 @@ support for multiple item types and custom card layouts.
 
 ## Architecture
 
-The PinnedItems system follows Gospel Kit's architectural principles:
+The PinnedItems system follows Church Hub's architectural principles:
 
 - **Church-Agnostic**: No hardcoded church-specific data or styling
 - **Type-Safe**: Full TypeScript + Zod validation via `@church/database`
@@ -31,7 +31,7 @@ The PinnedItems system follows Gospel Kit's architectural principles:
 
 ## Installation
 
-The components are already available in your Gospel Kit project via the
+The components are already available in your Church Hub project via the
 `@church/nextjs-ui` package.
 
 ## Basic Usage
@@ -325,7 +325,7 @@ getRegisteredItemTypes(): PinnedItemType[]
 
 ## Styling
 
-Uses Tailwind CSS with Gospel Kit's design tokens:
+Uses Tailwind CSS with Church Hub's design tokens:
 
 - `bg-card`, `border-border`, `text-foreground` - Semantic colors
 - Brand color via `--brand-primary` CSS variable (customize in globals.css)
@@ -346,10 +346,10 @@ Customize via your app's `globals.css`:
 2. **Use Zod Schemas**: Always validate with `@church/database` schemas
 3. **Optimistic UI**: Update UI immediately, rollback on error
 4. **Type Safety**: Let TypeScript catch issues at compile time
-5. **Follow Gospel Kit Patterns**: Match existing component structure
+5. **Follow Church Hub Patterns**: Match existing component structure
 
 ## Questions?
 
-- Check Gospel Kit's `CLAUDE.md` for architectural guidance
+- Check Church Hub's `CLAUDE.md` for architectural guidance
 - See `packages/nextjs/ui/src/components/` for component examples
 - Review `packages/core/database/` for schema patterns

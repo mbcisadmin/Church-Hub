@@ -1,14 +1,14 @@
 # CLAUDE.md
 
-Guidance for Claude Code when working with the Gospel Kit template.
+Guidance for Claude Code when working with the Church Hub template.
 
 ## Repository Overview
 
-Gospel Kit is a Next.js + MinistryPlatform integration template for churches.
+Church Hub is a Next.js + MinistryPlatform integration template for churches.
 Turborepo monorepo with shared packages, OAuth, API client, and audit logging.
 
 ```
-gospel-kit-template/
+church-hub-template/
 ├── apps/platform/                 # Main church apps platform (Next.js)
 ├── packages/
 │   ├── core/

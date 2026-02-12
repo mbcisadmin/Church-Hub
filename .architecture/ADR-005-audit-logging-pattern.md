@@ -318,7 +318,7 @@ async function updateContact(data: UpdateContactInput) {
 
 ## Migration Path
 
-If Gospel Kit adds a centralized way to handle userId (e.g., MP client wrapper),
+If Church Hub adds a centralized way to handle userId (e.g., MP client wrapper),
 we can:
 
 1. Create wrapper that accepts userId in constructor

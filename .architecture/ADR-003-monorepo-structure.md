@@ -4,7 +4,7 @@
 
 ## Context
 
-Gospel Kit needs to share code across multiple church applications while
+Church Hub needs to share code across multiple church applications while
 remaining flexible and maintainable. We need to decide on the repository
 structure.
 
@@ -28,7 +28,7 @@ structure.
 **Structure:**
 
 ```
-gospel-kit-template/
+church-hub-template/
 ├── apps/
 │   └── platform/              # Main church apps platform
 ├── packages/
@@ -122,7 +122,7 @@ packages/
 
 - **Scope**: All packages use `@church/` scope
   - Avoids naming conflicts with npm packages
-  - Clear that these are Gospel Kit packages
+  - Clear that these are Church Hub packages
   - Example: `@church/ministry-platform`
 
 - **Names**: kebab-case without framework prefix
@@ -165,7 +165,7 @@ Use Lerna or Nx instead of Turborepo.
 
 ## Migration Path
 
-If Gospel Kit grows significantly, we can:
+If Church Hub grows significantly, we can:
 
 1. **Extract packages to npm** - Publish core packages independently
 2. **Split apps** - Move apps to separate repos, consume published packages

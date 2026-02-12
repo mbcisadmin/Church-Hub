@@ -1,6 +1,6 @@
 # Critical Patterns
 
-> Patterns that must be followed in every Gospel Kit project.
+> Patterns that must be followed in every Church Hub project.
 
 ## 1. Always Use $userId for Audit Logging
 
@@ -40,7 +40,7 @@ TypeScript types enforce `$userId` at compile time, preventing runtime errors.
 
 ## 2. CSS Theming via Custom Properties
 
-Gospel Kit uses CSS custom properties for church branding (not hardcoded
+Church Hub uses CSS custom properties for church branding (not hardcoded
 colors).
 
 **Correct:**
@@ -71,7 +71,7 @@ Use `@church/tailwind-config` tokens, customize via CSS variables.
 
 ## 3. Raw TypeScript Packages (No Build Step)
 
-Gospel Kit packages export raw `.ts` files for better developer experience.
+Church Hub packages export raw `.ts` files for better developer experience.
 
 **Correct:**
 

@@ -4,9 +4,9 @@
 
 ## Context
 
-Gospel Kit is a template that gets cloned by individual churches. After cloning:
+Church Hub is a template that gets cloned by individual churches. After cloning:
 
-- **Gospel Kit Template** → Shared codebase (this repo)
+- **Church Hub Template** → Shared codebase (this repo)
 - **Church A's Deployment** → Church A's private fork
 - **Church B's Deployment** → Church B's private fork
 - **etc.**
@@ -15,23 +15,23 @@ Gospel Kit is a template that gets cloned by individual churches. After cloning:
 
 1. Build feature in Church A's deployment
 2. Realize: "Other churches I work with would benefit from this"
-3. Extract to Gospel Kit template
-4. Pull Gospel Kit updates into other church deployments
+3. Extract to Church Hub template
+4. Pull Church Hub updates into other church deployments
 5. All churches get the improvement
 
-**Problem:** How do I decide what should be extracted back to Gospel Kit vs kept
+**Problem:** How do I decide what should be extracted back to Church Hub vs kept
 in individual church deployments?
 
 **Key insight:** Once cloned, individual deployments can have church-specific
 code. The question isn't "is this church-agnostic?" but rather **"Should this go
-back in Gospel Kit so my other church clients can use it?"**
+back in Church Hub so my other church clients can use it?"**
 
 ## Decision
 
 Use the **Multi-Church Reuse Framework** to decide what gets abstracted to
-Gospel Kit.
+Church Hub.
 
-### Framework: Should This Be in Gospel Kit?
+### Framework: Should This Be in Church Hub?
 
 Ask these questions when building features in any church deployment:
 
@@ -60,20 +60,20 @@ Even if the feature is church-specific, ask: "Is there a reusable core?"
 
 - ❌ Annual meeting content → Church-specific
 - ✅ Annual meeting PAGE TEMPLATE → Reusable
-- **Decision:** Extract template to Gospel Kit, content stays in church
+- **Decision:** Extract template to Church Hub, content stays in church
   deployment
 
 **Example 2: Budget Approval**
 
 - ❌ A church's 3-tier approval process → Church-specific
 - ✅ Generic approval workflow component → Reusable
-- **Decision:** Extract approval UI to Gospel Kit, church-specific rules stay
+- **Decision:** Extract approval UI to Church Hub, church-specific rules stay
   local
 
 **Example 3: Carousel**
 
 - ✅ Entire carousel → Reusable
-- **Decision:** Extract entire thing to Gospel Kit
+- **Decision:** Extract entire thing to Church Hub
 
 #### 3. Can I make it generic without much effort?
 
@@ -93,9 +93,9 @@ Even if the feature is church-specific, ask: "Is there a reusable core?"
 
 | Feature Type                          | Multi-Church Use? | Core Reusable? | Decision                              |
 | ------------------------------------- | ----------------- | -------------- | ------------------------------------- |
-| UI Component (Carousel, Modal, Table) | Likely yes        | Yes            | **Extract to Gospel Kit**             |
-| MP API Helper                         | Likely yes        | Yes            | **Extract to Gospel Kit**             |
-| Data Schema (Contact, Event)          | Likely yes        | Yes            | **Extract to Gospel Kit**             |
+| UI Component (Carousel, Modal, Table) | Likely yes        | Yes            | **Extract to Church Hub**             |
+| MP API Helper                         | Likely yes        | Yes            | **Extract to Church Hub**             |
+| Data Schema (Contact, Event)          | Likely yes        | Yes            | **Extract to Church Hub**             |
 | Business Logic (Approval Workflow)    | Maybe             | Sometimes      | **Extract core, keep rules local**    |
 | Content (Annual Meeting)              | No                | No             | **Keep in church deployment**         |
 | Integration (Church-specific API)     | No                | Maybe          | **Keep local unless core is generic** |
@@ -118,14 +118,14 @@ Even if the feature is church-specific, ask: "Is there a reusable core?"
 
 **Step 3: Extract if beneficial**
 
-- Move generic code to Gospel Kit
+- Move generic code to Church Hub
 - Make it configurable (props, CSS vars)
-- Update church deployment to use Gospel Kit version
+- Update church deployment to use Church Hub version
 - Test in original church
 
 **Step 4: Pull into other churches**
 
-- Update Gospel Kit in other deployments
+- Update Church Hub in other deployments
 - Customize for each church (colors, content)
 - All churches benefit
 
@@ -177,7 +177,7 @@ export function MyChurchCarousel() {
 **If you need church-specific behavior:**
 
 ```typescript
-// In Gospel Kit: packages/nextjs/ui/carousel/
+// In Church Hub: packages/nextjs/ui/carousel/
 export function Carousel({ items, renderItem }: CarouselProps) {
   return (
     <div className="carousel">
@@ -201,7 +201,7 @@ export function Carousel({ items, renderItem }: CarouselProps) {
 
 ✅ **Clear decision framework** - Know what to abstract vs keep local ✅
 **Faster development** - Don't over-abstract prematurely ✅ **Reusable code** -
-Gospel Kit improves over time ✅ **Happy clients** - All churches benefit from
+Church Hub improves over time ✅ **Happy clients** - All churches benefit from
 improvements ✅ **Less duplication** - Build once, use across churches ✅
 **Easier maintenance** - Fix bug once, all churches get fix
 
@@ -221,7 +221,7 @@ improvements ✅ **Less duplication** - Build once, use across churches ✅
 
 ### Neutral Consequences
 
-- Gospel Kit template grows over time (expected)
+- Church Hub template grows over time (expected)
 - Some features stay church-specific (expected)
 - Extraction is manual process (could automate later)
 
@@ -247,7 +247,7 @@ export function ChurchCarousel() {
 - ✅ UI component → Generic
 - ❌ Church-specific photos → Specific
 
-**Step 3: Extract to Gospel Kit**
+**Step 3: Extract to Church Hub**
 
 ```typescript
 // packages/nextjs/ui/carousel/carousel.tsx
@@ -295,7 +295,7 @@ export default function HomePage() {
 **Step 3: Extract template only**
 
 ```typescript
-// Gospel Kit: packages/nextjs/ui/annual-meeting/
+// Church Hub: packages/nextjs/ui/annual-meeting/
 export function AnnualMeetingTemplate({
   phase,
   preContent,
@@ -335,7 +335,7 @@ export function AnnualMeetingTemplate({
 **Decision:** This is a standard MP pattern → Extract immediately
 
 ```typescript
-// Gospel Kit: packages/core/ministry-platform/src/contacts.ts
+// Church Hub: packages/core/ministry-platform/src/contacts.ts
 export async function getContactWithHouseholds(
   contactId: number,
   userId: number
@@ -372,7 +372,7 @@ Kit benefits community.
 **Before marking a feature "complete," ask:**
 
 1. ✅ Did I build anything that could help other churches?
-2. ✅ Did I extract the reusable parts to Gospel Kit?
+2. ✅ Did I extract the reusable parts to Church Hub?
 3. ✅ Is the code structured for easy extraction if needed later?
 
 ## References

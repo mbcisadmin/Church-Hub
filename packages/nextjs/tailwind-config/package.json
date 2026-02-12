@@ -1,7 +1,7 @@
 {
   "name": "@church/tailwind-config",
   "version": "1.0.0",
-  "description": "Shared Tailwind CSS configuration and design tokens for Gospel Kit",
+  "description": "Shared Tailwind CSS configuration and design tokens for Church Hub",
   "main": "index.js",
   "exports": {
     ".": "./index.js",
@@ -16,7 +16,7 @@
     "tailwind",
     "design-tokens",
     "church",
-    "gospel-kit"
+    "church-hub"
   ],
   "peerDependencies": {
     "tailwindcss": "^4.0.0"

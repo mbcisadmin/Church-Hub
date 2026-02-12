@@ -2,7 +2,7 @@
 
 > When to abstract code into shared packages vs keep it local to an app.
 
-This is the **most important decision** when building with Gospel Kit.
+This is the **most important decision** when building with Church Hub.
 
 ## Decision Framework
 

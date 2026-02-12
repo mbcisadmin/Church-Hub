@@ -1,5 +1,5 @@
 -- ================================================================================
--- McLean Bible Church - Required Stored Procedures for Gospel Kit Apps Platform
+-- McLean Bible Church - Required Stored Procedures for Church Hub Apps Platform
 -- ================================================================================
 --
 -- This file contains all stored procedures needed for the apps platform to work.

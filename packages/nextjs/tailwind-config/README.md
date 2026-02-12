@@ -1,10 +1,10 @@
 # @church/tailwind-config
 
-Shared Tailwind CSS configuration and design tokens for Gospel Kit projects.
+Shared Tailwind CSS configuration and design tokens for Church Hub projects.
 
 ## Overview
 
-This package provides a consistent design system across all Gospel Kit
+This package provides a consistent design system across all Church Hub
 applications, including:
 
 - **Color system** using CSS custom properties for easy theming
@@ -14,7 +14,7 @@ applications, including:
 
 ## Installation
 
-This package is already installed as part of the Gospel Kit monorepo. No
+This package is already installed as part of the Church Hub monorepo. No
 additional setup needed.
 
 ## Usage
@@ -215,7 +215,7 @@ No changes needed in JavaScript/TypeScript - colors automatically update!
 
 ## Benefits
 
-✅ **Consistent design** across all Gospel Kit apps ✅ **Easy church branding**
+✅ **Consistent design** across all Church Hub apps ✅ **Easy church branding**
 via CSS variables ✅ **Type-safe** with TypeScript support ✅ **Extendable** for
 church-specific needs ✅ **Dark mode ready** out of the box ✅ **Single source
 of truth** for design tokens

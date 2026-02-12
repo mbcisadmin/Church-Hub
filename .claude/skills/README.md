@@ -1,6 +1,6 @@
 # Claude Code Skills
 
-Skills for Gospel Kit development. Template-specific skills live here; shared
+Skills for Church Hub development. Template-specific skills live here; shared
 skills (like MinistryPlatform) are in the parent `.claude/skills/` folder.
 
 ## Template-Specific Skills (this folder)

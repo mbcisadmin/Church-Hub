@@ -1,6 +1,6 @@
 # Development Guide
 
-This guide covers the day-to-day developer workflow for Gospel Kit.
+This guide covers the day-to-day developer workflow for Church Hub.
 
 ## Table of Contents
 
@@ -508,7 +508,7 @@ Run with `npm run test:ui` for visual debugging.
 
 **Status:** Temporary workaround in place - all functionality works perfectly
 
-**Background:** Gospel Kit uses Next.js 16.0.7, which introduced a breaking
+**Background:** Church Hub uses Next.js 16.0.7, which introduced a breaking
 change to API route signatures. Dynamic routes now receive a `context` parameter
 with async `params`:
 

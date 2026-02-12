@@ -238,7 +238,7 @@ Create WordPress plugin or add to functions.php:
 
 ```php
 // In WordPress plugin or functions.php
-function gospel_kit_widget_shortcode($atts) {
+function church_hub_widget_shortcode($atts) {
   $atts = shortcode_atts([
     'type' => 'event-registration',
     'event_id' => '',
@@ -255,13 +255,13 @@ function gospel_kit_widget_shortcode($atts) {
     esc_url($script_url)
   );
 }
-add_shortcode('gospel_kit_widget', 'gospel_kit_widget_shortcode');
+add_shortcode('church_hub_widget', 'church_hub_widget_shortcode');
 ```
 
 **Usage in WordPress:**
 
 ```
-[gospel_kit_widget type="event-registration" event_id="123"]
+[church_hub_widget type="event-registration" event_id="123"]
 ```
 
 ### Direct HTML Block

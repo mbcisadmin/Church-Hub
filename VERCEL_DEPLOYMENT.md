@@ -1,11 +1,11 @@
 # McLean Bible Church - Vercel Deployment Guide
 
-This guide walks through deploying the Gospel Kit apps platform to Vercel for
+This guide walks through deploying the Church Hub apps platform to Vercel for
 McLean Bible Church.
 
 ## Prerequisites
 
-- [x] GitHub repository: `https://github.com/mbcisadmin/Gospel-Kit`
+- [x] GitHub repository: `https://github.com/mbcisadmin/Church-Hub`
 - [x] Code committed and pushed to `main` branch
 - [ ] Vercel account access (mbcisadmin or organization)
 - [ ] Domain ready (optional, can use Vercel subdomain initially)
@@ -21,7 +21,7 @@ McLean Bible Church.
 2. **Import Repository**
    - Click **"Add New"** → **"Project"**
    - Select **"Import Git Repository"**
-   - Choose: `mbcisadmin/Gospel-Kit`
+   - Choose: `mbcisadmin/Church-Hub`
    - Click **"Import"**
 
 3. **Configure Project Settings**
@@ -120,7 +120,7 @@ These are unique to the apps platform project.
    - Vercel will auto-deploy on every push to `main`
 
 2. **Check Deployment**
-   - Visit the Vercel-provided URL (e.g., `gospel-kit-abc123.vercel.app`)
+   - Visit the Vercel-provided URL (e.g., `church-hub-abc123.vercel.app`)
    - Verify the app loads
    - **Note:** Authentication won't work until stored procedures are installed
 
@@ -244,5 +244,5 @@ After successful deployment:
 ## Support
 
 - **Vercel Docs:** https://vercel.com/docs
-- **Gospel Kit:** See SETUP.md and DEVELOPMENT.md
+- **Church Hub:** See SETUP.md and DEVELOPMENT.md
 - **Issues:** Document in UPSTREAM_FIXES.md if template-related

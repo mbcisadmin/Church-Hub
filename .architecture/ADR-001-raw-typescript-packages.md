@@ -4,7 +4,7 @@
 
 ## Context
 
-Gospel Kit is a monorepo with shared packages consumed by Next.js applications.
+Church Hub is a monorepo with shared packages consumed by Next.js applications.
 We need to decide whether internal packages should:
 
 1. **Compile to JavaScript** (traditional approach)
@@ -22,7 +22,7 @@ Modern bundlers (Next.js, Vite) can consume TypeScript directly.
 
 ## Decision
 
-**Gospel Kit packages will export raw TypeScript files** without a compilation
+**Church Hub packages will export raw TypeScript files** without a compilation
 step.
 
 **Implementation:**
@@ -67,7 +67,7 @@ Apps get full TypeScript checking of package code
 ❌ **External publishing harder** - If packages are published to npm, need
 separate build
 
-- **Mitigation**: Gospel Kit packages are internal-only (not published)
+- **Mitigation**: Church Hub packages are internal-only (not published)
 
 ❌ **Requires modern bundler** - Consuming apps must support TypeScript
 
@@ -106,7 +106,7 @@ Some packages raw TypeScript, some compiled.
 
 - Inconsistent developer experience
 - Confusion about which packages use which approach
-- All Gospel Kit packages benefit from raw TypeScript
+- All Church Hub packages benefit from raw TypeScript
 
 ## References
 

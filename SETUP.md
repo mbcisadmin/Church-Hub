@@ -1,6 +1,6 @@
 # Church Setup Guide
 
-This guide walks through setting up Gospel Kit for a new church, from repository
+This guide walks through setting up Church Hub for a new church, from repository
 creation to first deployment.
 
 **Estimated Time:** 2-3 hours for complete setup
@@ -34,7 +34,7 @@ Before starting, ensure you have:
 
 ```bash
 # Clone the template
-git clone <gospel-kit-template-url> yourchurch-apps
+git clone <church-hub-template-url> yourchurch-apps
 cd yourchurch-apps
 
 # Remove template's git history
@@ -43,7 +43,7 @@ rm -rf .git
 # Initialize fresh repository
 git init
 git add .
-git commit -m "Initial commit from Gospel Kit template"
+git commit -m "Initial commit from Church Hub template"
 ```
 
 ### Step 2: Customize Workspace Scope (Optional)
@@ -265,7 +265,7 @@ Ensure your API user has permissions on these tables:
 Create environment file at the **monorepo root**:
 
 ```bash
-# From gospel-kit-template root directory
+# From church-hub-template root directory
 cp .env.example .env
 ```
 
@@ -675,7 +675,7 @@ If you encounter issues:
 
 ## 🎉 You're Ready!
 
-Your Gospel Kit instance is now set up and ready for development. Start building
+Your Church Hub instance is now set up and ready for development. Start building
 custom apps for your church!
 
 **Remember:**

@@ -1,4 +1,4 @@
-# Gospel Kit
+# Church Hub
 
 > **A modern, type-safe toolkit for building church applications with
 > MinistryPlatform integration**
@@ -9,7 +9,7 @@
 [![Turborepo](https://img.shields.io/badge/Turborepo-latest-red)](https://turbo.build)
 [![Tailwind CSS 4](https://img.shields.io/badge/Tailwind-4.0-38bdf8)](https://tailwindcss.com)
 
-Gospel Kit is a Turborepo monorepo template that provides everything you need to
+Church Hub is a Turborepo monorepo template that provides everything you need to
 build custom apps, microsites, and integrations for churches using
 MinistryPlatform. It emphasizes type safety, proper audit logging, and developer
 experience.
@@ -56,7 +56,7 @@ Pre-built skills to accelerate development:
 ## 🏗️ Architecture
 
 ```
-gospel-kit-template/
+church-hub-template/
 ├── packages/
 │   ├── core/
 │   │   ├── ministry-platform/    # MP API client

@@ -1,6 +1,6 @@
 ---
 name: Question
-about: Ask a question about Gospel Kit
+about: Ask a question about Church Hub
 title: '[QUESTION] '
 labels: question
 assignees: ''

@@ -1,6 +1,6 @@
 # @church/database
 
-Zod schemas and database utilities for all database systems used in Gospel Kit.
+Zod schemas and database utilities for all database systems used in Church Hub.
 
 ## Features
 

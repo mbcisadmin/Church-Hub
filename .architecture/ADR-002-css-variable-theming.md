@@ -4,7 +4,7 @@
 
 ## Context
 
-Gospel Kit is a template used by multiple churches. Each church needs to apply
+Church Hub is a template used by multiple churches. Each church needs to apply
 their own branding (colors, fonts, etc.). We need to decide how churches
 customize the look and feel.
 
@@ -110,7 +110,7 @@ Churches edit `tailwind.config.ts` to change colors.
 
 - Requires rebuild for every color change
 - More complex for non-technical users
-- Merge conflicts when updating Gospel Kit
+- Merge conflicts when updating Church Hub
 
 ### Alternative 2: JavaScript Theme Provider
 

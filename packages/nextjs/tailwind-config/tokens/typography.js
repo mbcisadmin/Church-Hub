@@ -2,7 +2,7 @@
  * Typography Tokens
  *
  * Shared font families, sizes, weights, and text styles.
- * Based on Gospel Kit's design system.
+ * Based on Church Hub's design system.
  */
 
 module.exports = {

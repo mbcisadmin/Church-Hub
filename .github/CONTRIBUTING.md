@@ -1,11 +1,11 @@
-# Contributing to Gospel Kit
+# Contributing to Church Hub
 
-Thank you for your interest in contributing to Gospel Kit! This guide will help
+Thank you for your interest in contributing to Church Hub! This guide will help
 you get started.
 
 ## 🎯 Project Goals
 
-Gospel Kit is a template for building church applications with MinistryPlatform.
+Church Hub is a template for building church applications with MinistryPlatform.
 Our goals are:
 
 1. **Type Safety** - Enforce types throughout the stack
@@ -21,7 +21,7 @@ Our goals are:
 ```bash
 # Clone the repository
 git clone <repo-url>
-cd gospel-kit-template
+cd church-hub-template
 
 # Install dependencies
 npm install
@@ -37,7 +37,7 @@ npm run dev
 ### Project Structure
 
 ```
-gospel-kit-template/
+church-hub-template/
 ├── packages/          # Shared packages
 │   ├── core/         # Framework-agnostic packages
 │   └── nextjs/       # Next.js specific packages
@@ -372,5 +372,5 @@ same license as the project.
 
 Contributors will be recognized in the project README.
 
-Thank you for contributing to Gospel Kit! Your work helps churches build better
+Thank you for contributing to Church Hub! Your work helps churches build better
 applications. 🙏

@@ -1,6 +1,6 @@
 // Database Package
 //
-// This package provides type-safe schemas for all database systems used in Gospel Kit.
+// This package provides type-safe schemas for all database systems used in Church Hub.
 // Schemas are organized by database system (MinistryPlatform, Neon, etc.)
 
 // Re-export all MinistryPlatform schemas (for backward compatibility)

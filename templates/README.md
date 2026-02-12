@@ -1,6 +1,6 @@
 # Templates
 
-Starter templates for creating new applications in Gospel Kit.
+Starter templates for creating new applications in Church Hub.
 
 ## Available Templates
 

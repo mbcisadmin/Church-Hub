@@ -1,7 +1,7 @@
 /**
- * Gospel Kit - Shared Tailwind CSS Configuration
+ * Church Hub - Shared Tailwind CSS Configuration
  *
- * This preset provides a consistent design system across all Gospel Kit projects.
+ * This preset provides a consistent design system across all Church Hub projects.
  * Churches can extend or override these settings in their app's tailwind.config.
  *
  * Usage in your app:

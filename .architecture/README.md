@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-This directory contains records of architectural decisions made for Gospel Kit.
+This directory contains records of architectural decisions made for Church Hub.
 
 ## What is an ADR?
 

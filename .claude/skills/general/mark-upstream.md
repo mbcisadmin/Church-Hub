@@ -1,11 +1,11 @@
 ---
-description: Document a template bug fix for backporting to gospel-kit-template
+description: Document a template bug fix for backporting to church-hub-template
 ---
 
 # Mark Upstream Fix
 
 This skill helps you document bugs fixed in a church fork that should be
-backported to gospel-kit-template.
+backported to church-hub-template.
 
 ## Usage
 
@@ -93,7 +93,7 @@ When this skill is invoked:
    ✓ Added to UPSTREAM_FIXES.md under "Pending Backport"
 
    When you're ready to backport:
-   1. Open gospel-kit-template repository
+   1. Open church-hub-template repository
    2. Review UPSTREAM_FIXES.md
    3. Apply fixes to template
    4. Move entries to "Applied to Template" section
@@ -122,7 +122,7 @@ instead of waiting for 401 response.
 
 ## Notes
 
-- This skill is ONLY for church forks, not gospel-kit-template itself
+- This skill is ONLY for church forks, not church-hub-template itself
 - Remind user to actually backport fixes periodically
 - If many fixes accumulate (5+), suggest backporting soon
 - This creates a paper trail for template improvements

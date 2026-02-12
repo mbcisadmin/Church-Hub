@@ -1,14 +1,14 @@
 # Upstream Fixes
 
-This file tracks bugs and improvements discovered in this church deployment that should be backported to the **gospel-kit-template** repository.
+This file tracks bugs and improvements discovered in this church deployment that should be backported to the **church-hub-template** repository.
 
-> **Important:** This is a fork of gospel-kit-template. When you fix template bugs (not church-specific issues), document them here so they can be applied to the template and benefit all churches.
+> **Important:** This is a fork of church-hub-template. When you fix template bugs (not church-specific issues), document them here so they can be applied to the template and benefit all churches.
 
 ---
 
 ## Pending Backport
 
-Fixes that need to be applied to gospel-kit-template:
+Fixes that need to be applied to church-hub-template:
 
 <!-- Example:
 ### Fix API Token Refresh Logic
@@ -80,7 +80,7 @@ Added custom budget approval workflow for the finance team. Other churches have 
 
 ### When Backporting to Template
 
-1. Open gospel-kit-template repository
+1. Open church-hub-template repository
 2. For each item in "Pending Backport":
    - Apply the fix to the template
    - Test thoroughly

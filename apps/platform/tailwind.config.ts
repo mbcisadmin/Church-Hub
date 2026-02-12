@@ -2,9 +2,9 @@ import type { Config } from 'tailwindcss';
 import baseConfig from '@church/tailwind-config';
 
 /**
- * Tailwind Configuration for Gospel Kit Platform
+ * Tailwind Configuration for Church Hub Platform
  *
- * This extends the base Gospel Kit configuration with app-specific settings.
+ * This extends the base Church Hub configuration with app-specific settings.
  * Church-specific branding is defined in globals.css via CSS variables.
  */
 export default {

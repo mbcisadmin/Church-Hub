@@ -369,4 +369,4 @@ source files.
 
 ## License
 
-MIT License - Gospel Kit Template
+MIT License - Church Hub Template

@@ -1,14 +1,14 @@
 # Upstream Workflow
 
-> How to manage fixes between church forks and the Gospel Kit template.
+> How to manage fixes between church forks and the Church Hub template.
 
 **Note:** This only applies when working in a **church fork** of
-gospel-kit-template. If you're in the template repository itself, skip this.
+church-hub-template. If you're in the template repository itself, skip this.
 
 ## Understanding the Fork Relationship
 
 ```
-gospel-kit-template (canonical)
+church-hub-template (canonical)
     ↓ clone
 Church Deployment (church fork)
     ↓ you fix a bug
@@ -16,7 +16,7 @@ Should it go back to template?
     ↓ yes
 Document in UPSTREAM_FIXES.md
     ↓ later
-Backport to gospel-kit-template
+Backport to church-hub-template
     ↓ benefit
 All other churches get the fix
 ```
@@ -25,7 +25,7 @@ All other churches get the fix
 
 **Always ask:** "Is this a template bug or church-specific?"
 
-### Template Bug (Backport to gospel-kit-template)
+### Template Bug (Backport to church-hub-template)
 
 - Bug in core packages (`@church/ministry-platform`, `@church/database`, etc.)
 - Bug in shared UI components (`@church/nextjs-ui`)
@@ -77,7 +77,7 @@ expiry instead of waiting for 401 response.
 
 ### 3. Backporting to template
 
-1. Open gospel-kit-template repository
+1. Open church-hub-template repository
 2. Apply each fix from `UPSTREAM_FIXES.md`
 3. Test thoroughly in template
 4. Commit with reference to church fork
@@ -86,7 +86,7 @@ expiry instead of waiting for 401 response.
 
 ## First Church Fork Will Expose Everything
 
-The first church to use gospel-kit-template will discover:
+The first church to use church-hub-template will discover:
 
 - Bugs in core packages
 - Missing features
@@ -123,6 +123,6 @@ refresh is broken.
 
 4. **Later (weekly/monthly), backport fixes:**
    - Review `UPSTREAM_FIXES.md` in church fork
-   - Apply fixes to gospel-kit-template
+   - Apply fixes to church-hub-template
    - Pull template updates into church fork
    - Next church deployment gets fixes automatically
