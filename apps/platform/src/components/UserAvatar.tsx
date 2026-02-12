@@ -96,7 +96,7 @@ export default function UserAvatar({
               </textPath>
             </text>
           </svg>
-          <User className={`text-secondary/30 ${iconSizeClasses[size]}`} />
+          <User className={`text-secondary/15 ${iconSizeClasses[size]}`} />
         </button>
       )}
     </div>
