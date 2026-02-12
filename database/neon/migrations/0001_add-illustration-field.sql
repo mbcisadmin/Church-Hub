@@ -1,0 +1,1 @@
+ALTER TABLE "applications" ADD COLUMN "illustration" varchar(255);

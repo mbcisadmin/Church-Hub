@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1000" height="1000" viewBox="0 0 1000 1000"><style>
+    #light-icon {
+      display: inline;
+    }
+    #dark-icon {
+      display: none;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #light-icon {
+        display: none;
+      }
+      #dark-icon {
+        display: inline;
+      }
+    }
+  </style><g id="light-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 79.2 79.2" width="1000" height="1000"><path d="M79.2,79.2h-19.8v-19.8h-19.8v-19.8h39.6v39.6h0ZM59.4,19.8H19.8v59.4H0V0h59.4v19.8h0Z" fill="#282828" fill-rule="evenodd"/></svg></g><g id="dark-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 79.2 79.2" width="1000" height="1000"><path d="M79.2,79.2h-19.8v-19.8h-19.8v-19.8h39.6v39.6h0ZM59.4,19.8H19.8v59.4H0V0h59.4v19.8h0Z" fill="#7c7c7c" fill-rule="evenodd"/></svg></g></svg>

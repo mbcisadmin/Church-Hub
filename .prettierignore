@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# Cache
+.cache/
+*.log
+.DS_Store
+
+# Package manager
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env*.local
+
+# Generated files
+*.generated.*
+.contentlayer/
