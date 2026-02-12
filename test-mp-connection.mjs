@@ -53,7 +53,7 @@ async function testConnection() {
   // Test OAuth token retrieval
   console.log('🔐 Testing OAuth token retrieval...');
   try {
-    const tokenUrl = `${process.env.MINISTRY_PLATFORM_BASE_URL}/ministryplatformapi/oauth/connect/token`;
+    const tokenUrl = `${process.env.MINISTRY_PLATFORM_BASE_URL}/oauth/connect/token`;
 
     const params = new URLSearchParams({
       grant_type: 'client_credentials',
@@ -86,7 +86,7 @@ async function testConnection() {
 
     // Test a simple API call
     console.log('📊 Testing API call (fetching tables metadata)...');
-    const apiUrl = `${process.env.MINISTRY_PLATFORM_BASE_URL}/ministryplatformapi/tables`;
+    const apiUrl = `${process.env.MINISTRY_PLATFORM_BASE_URL}/tables`;
 
     const apiResponse = await fetch(apiUrl, {
       method: 'GET',
