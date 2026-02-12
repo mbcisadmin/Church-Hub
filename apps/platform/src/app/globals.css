@@ -287,6 +287,25 @@ header nav {
   color: var(--brand-primary);
 }
 
+/* Gradient fill on hover for header logo — crossfade via opacity */
+.logo-gradient-hover .logo-base {
+  opacity: 1;
+  transition: opacity 300ms ease-out;
+}
+
+.logo-gradient-hover .logo-grad {
+  opacity: 0;
+  transition: opacity 300ms ease-out;
+}
+
+.group:hover .logo-gradient-hover .logo-base {
+  opacity: 0;
+}
+
+.group:hover .logo-gradient-hover .logo-grad {
+  opacity: 1;
+}
+
 /* Hide scrollbars but keep scroll functionality */
 .scrollbar-hide {
   scrollbar-width: none; /* Firefox */

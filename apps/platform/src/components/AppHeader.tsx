@@ -113,7 +113,10 @@ export default function AppHeader() {
           {/* Logo + Title - logo centered in 56px to align with rail icons below */}
           <Link href="/" className="group flex items-center">
             <div className="flex w-14 shrink-0 items-center justify-center">
-              <ChurchLogo className="group-hover:text-primary h-7 w-7 text-[#D7D7D7] transition-colors duration-300" />
+              <ChurchLogo
+                className="h-7 w-7 text-[#D7D7D7] transition-colors duration-300"
+                hoverGradient
+              />
             </div>
             <div className="ml-0.5 flex flex-col">
               <span className="group-hover:text-primary text-sm leading-tight font-bold tracking-widest text-white transition-colors duration-300">
