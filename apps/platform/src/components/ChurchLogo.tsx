@@ -9,7 +9,7 @@ export default function ChurchLogo({
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 26.3 26.3"
-      className={`${className ?? ''}${hoverGradient ? 'logo-gradient-hover' : ''}`}
+      className={[className, hoverGradient && 'logo-gradient-hover'].filter(Boolean).join(' ')}
       aria-hidden="true"
     >
       {hoverGradient && (
