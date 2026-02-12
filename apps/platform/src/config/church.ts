@@ -27,13 +27,13 @@ export const churchConfig = {
 
   // ── App Branding ────────────────────────────────────────────────
   /** App display name — header, page titles, PWA */
-  appName: 'MBC Apps',
+  appName: 'The Hub',
 
   /** App description — metadata, PWA manifest */
   appDescription: 'Internal tools and dashboards for McLean Bible Church staff and volunteers',
 
   /** Builder credit — shown in footer (leave empty to hide) */
-  builtBy: '',
+  builtBy: 'Colton Wirgau',
 
   // ── Deployment (from env) ───────────────────────────────────────
   /** MinistryPlatform base URL — sign-out redirect, image loading */
