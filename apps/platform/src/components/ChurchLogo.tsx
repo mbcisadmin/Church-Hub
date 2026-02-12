@@ -36,6 +36,8 @@ export default function ChurchLogo({
       {/* Gradient layer — fades in on hover */}
       {hoverGradient && (
         <g className="logo-grad">
+          {/* White fill behind gradient to cover center gaps between star arms */}
+          <circle cx="13.15" cy="13.19" r="10" fill="white" />
           <path
             d="M82.65,270.8A13.15,13.15,0,1,0,95.8,283.95,13.151,13.151,0,0,0,82.65,270.8Zm0,24.295a11.107,11.107,0,1,1,11.107-11.107A11.114,11.114,0,0,1,82.65,295.095Z"
             transform="translate(-69.5 -270.8)"

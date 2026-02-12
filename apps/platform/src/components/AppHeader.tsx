@@ -114,7 +114,7 @@ export default function AppHeader() {
           <Link href="/" className="group flex items-center">
             <div className="flex w-14 shrink-0 items-center justify-center">
               <ChurchLogo
-                className="h-7 w-7 text-[#D7D7D7] transition-colors duration-300"
+                className="h-7 w-7 text-white/70 transition-colors duration-300"
                 hoverGradient
               />
             </div>
