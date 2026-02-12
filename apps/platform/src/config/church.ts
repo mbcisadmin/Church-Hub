@@ -32,9 +32,6 @@ export const churchConfig = {
   /** App description — metadata, PWA manifest */
   appDescription: 'Internal tools and dashboards for McLean Bible Church staff and volunteers',
 
-  /** Builder credit — shown in footer (leave empty to hide) */
-  builtBy: 'Colton Wirgau',
-
   // ── Deployment (from env) ───────────────────────────────────────
   /** MinistryPlatform base URL — sign-out redirect, image loading */
   mpBaseUrl: process.env.NEXT_PUBLIC_MINISTRY_PLATFORM_BASE_URL || '',

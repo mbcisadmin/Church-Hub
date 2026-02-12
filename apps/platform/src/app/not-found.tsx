@@ -17,7 +17,6 @@ export default function NotFound() {
       tagline={churchConfig.tagline}
       logo={<ChurchLogo className="h-6 w-6 text-white/50" />}
       links={footerLinks()}
-      builtBy={churchConfig.builtBy}
     />
   );
 

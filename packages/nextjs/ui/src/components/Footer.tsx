@@ -19,10 +19,6 @@ export interface FooterProps {
   logo?: ReactNode;
   /** Optional copyright year override (defaults to current year) */
   year?: number;
-  /** Optional "Built by" credit name */
-  builtBy?: string;
-  /** Optional link for the "Built by" credit */
-  builtByHref?: string;
   /** Optional z-index class override (default: z-10) */
   zIndex?: string;
 }
@@ -37,11 +33,23 @@ export default function Footer({
   links = [],
   logo,
   year,
-  builtBy,
-  builtByHref,
   zIndex = 'z-10',
 }: FooterProps) {
   const currentYear = year ?? new Date().getFullYear();
+
+  const poweredBy = (
+    <span className="text-xs text-white/30">
+      Powered by{' '}
+      <a
+        href="https://churchhub.dev"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="transition-colors hover:text-white/50"
+      >
+        Church Hub
+      </a>
+    </span>
+  );
 
   return (
     <footer className={`bg-secondary text-secondary-foreground relative ${zIndex}`}>
@@ -78,23 +86,7 @@ export default function Footer({
                 ))}
               </div>
             )}
-            {builtBy && (
-              <span className="text-xs text-white/30">
-                Built by{' '}
-                {builtByHref ? (
-                  <a
-                    href={builtByHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors hover:text-white/50"
-                  >
-                    {builtBy}
-                  </a>
-                ) : (
-                  builtBy
-                )}
-              </span>
-            )}
+            {poweredBy}
           </div>
         </div>
 
@@ -121,29 +113,11 @@ export default function Footer({
               >
                 {link.label}
               </a>
-              {(index < links.length - 1 || builtBy) && (
-                <span className="hidden text-white/30 lg:inline">•</span>
-              )}
+              <span className="hidden text-white/30 lg:inline">•</span>
             </span>
           ))}
-          {/* Hide built by on smaller screens */}
-          {builtBy && (
-            <span className="hidden text-xs text-white/30 lg:inline">
-              Built by{' '}
-              {builtByHref ? (
-                <a
-                  href={builtByHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors hover:text-white/50"
-                >
-                  {builtBy}
-                </a>
-              ) : (
-                builtBy
-              )}
-            </span>
-          )}
+          {/* Hide on smaller screens */}
+          <span className="hidden lg:inline">{poweredBy}</span>
         </div>
       </div>
     </footer>
