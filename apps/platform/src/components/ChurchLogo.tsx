@@ -2,14 +2,19 @@ export default function ChurchLogo({ className }: { className?: string }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 79.2 79.2"
+      viewBox="0 0 26.3 26.3"
       className={className}
       aria-hidden="true"
     >
       <path
-        d="M79.2,79.2h-19.8v-19.8h-19.8v-19.8h39.6v39.6h0ZM59.4,19.8H19.8v59.4H0V0h59.4v19.8h0Z"
+        d="M82.65,270.8A13.15,13.15,0,1,0,95.8,283.95,13.151,13.151,0,0,0,82.65,270.8Zm0,24.295a11.107,11.107,0,1,1,11.107-11.107A11.114,11.114,0,0,1,82.65,295.095Z"
+        transform="translate(-69.5 -270.8)"
         fill="currentColor"
-        fillRule="evenodd"
+      />
+      <path
+        d="M87.239,278.2a10.439,10.439,0,1,0,10.439,10.439A10.448,10.448,0,0,0,87.239,278.2Zm-.409,18.24c-1.746-4.458-3.046-5.684-7.5-7.43h7.541Zm-7.541-8.173c4.458-1.783,5.758-2.972,7.5-7.43v7.43Zm8.358,0v-7.43c1.746,4.458,3.046,5.684,7.5,7.43Z"
+        transform="translate(-74.088 -275.451)"
+        fill="currentColor"
       />
     </svg>
   );

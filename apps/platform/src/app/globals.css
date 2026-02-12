@@ -48,7 +48,7 @@
 }
 
 :root {
-  --radius: 0.125rem;
+  --radius: 0;
   /* Church Branding — McLean Bible Church */
   --brand-primary: #1d9fd9;
   --brand-primary-dark: #1788be;

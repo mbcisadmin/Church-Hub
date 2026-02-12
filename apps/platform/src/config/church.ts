@@ -27,7 +27,7 @@ export const churchConfig = {
 
   // ── App Branding ────────────────────────────────────────────────
   /** App display name — header, page titles, PWA */
-  appName: 'The Hub',
+  appName: 'Church Hub',
 
   /** App description — metadata, PWA manifest */
   appDescription: 'Internal tools and dashboards for McLean Bible Church staff and volunteers',
