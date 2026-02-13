@@ -14,13 +14,11 @@ import {
   HandCoins,
   UsersRound,
   Handshake,
-  UserSearch,
   LogOut,
   Sun,
   Moon,
   Bell,
 } from 'lucide-react';
-import ImpersonateModal from '@/components/ImpersonateModal';
 import {
   MOCK_NOTIFICATIONS,
   type Notification,
@@ -127,10 +125,8 @@ export default function ProfileOverlay({ open, onClose }: ProfileOverlayProps) {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const { buildUrl } = usePreserveParams();
-  const isAdmin = session?.isAdmin ?? false;
 
   const [mounted, setMounted] = useState(false);
-  const [impersonateModalOpen, setImpersonateModalOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -533,19 +529,6 @@ export default function ProfileOverlay({ open, onClose }: ProfileOverlayProps) {
                     </div>
                   </div>
 
-                  {/* Admin Tools */}
-                  {isAdmin && (
-                    <div className="border-border/50 border-b px-5 py-4 sm:col-span-2">
-                      <button
-                        onClick={() => setImpersonateModalOpen(true)}
-                        className="flex w-full items-center justify-center gap-2 bg-amber-500/20 px-4 py-2.5 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-500/30 dark:text-amber-300"
-                      >
-                        <UserSearch className="h-4 w-4" />
-                        Impersonate User
-                      </button>
-                    </div>
-                  )}
-
                   {/* Footer actions */}
                   <div className="border-border/50 flex items-center justify-between border-b px-5 py-3 sm:col-span-2">
                     <button
@@ -576,9 +559,6 @@ export default function ProfileOverlay({ open, onClose }: ProfileOverlayProps) {
               </div>
             </motion.div>
           </div>
-
-          {/* Impersonate Modal */}
-          <ImpersonateModal open={impersonateModalOpen} onOpenChange={setImpersonateModalOpen} />
         </>
       )}
     </AnimatePresence>,

@@ -3,20 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { Search, Menu, Mail, MessageCircle } from 'lucide-react';
 import { QuickActions } from '@church/nextjs-ui/components/QuickActions';
 import ChurchLogo from '@/components/ChurchLogo';
 import SearchSheet from '@/components/SearchSheet';
 import UserAvatar from '@/components/UserAvatar';
-import ProfileSheet from '@/components/ProfileSheet';
+import ProfileOverlay from '@/components/ProfileOverlay';
 import SimulationBanner from '@/components/SimulationBanner';
 import NavigationSidebar from '@/components/NavigationSidebar';
 import AlertBanner from '@/components/AlertBanner';
 import { HeaderActionsTarget } from '@/components/HeaderActions';
 import { MOCK_NOTIFICATIONS, type Notification } from '@/components/NotificationsSheet';
 import { usePreserveParams } from '@/lib/usePreserveParams';
-import { churchConfig } from '@/config/church';
 
 export default function AppHeader() {
   const router = useRouter();
@@ -30,16 +29,6 @@ export default function AppHeader() {
   const [notifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleSignOut = async () => {
-    const idToken = session?.idToken;
-    await signOut({ redirect: false });
-    const params = new URLSearchParams({
-      post_logout_redirect_uri: window.location.origin,
-    });
-    if (idToken) params.set('id_token_hint', idToken);
-    window.location.href = `${churchConfig.mpBaseUrl}/oauth/connect/endsession?${params.toString()}`;
-  };
 
   return (
     <>
@@ -119,11 +108,11 @@ export default function AppHeader() {
               />
             </div>
             <div className="ml-0.5 flex flex-col">
-              <span className="group-hover:text-primary text-sm leading-tight font-bold tracking-widest text-white transition-colors duration-300">
-                {churchConfig.appName.toUpperCase()}
+              <span className="group-hover:text-primary text-base leading-tight font-extrabold tracking-wide text-white transition-colors duration-300">
+                MCLEAN
               </span>
-              <span className="group-hover:text-primary text-[9px] leading-tight tracking-widest text-white/50 transition-colors duration-300">
-                {churchConfig.name.toUpperCase()}
+              <span className="group-hover:text-primary text-[9px] leading-tight font-bold tracking-widest text-white/50 transition-colors duration-300">
+                BIBLE CHURCH
               </span>
             </div>
           </Link>
@@ -207,17 +196,8 @@ export default function AppHeader() {
       {/* Navigation Sidebar */}
       <NavigationSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Profile Sheet */}
-      <ProfileSheet
-        open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-        firstName={session?.firstName}
-        lastName={session?.lastName}
-        email={session?.email}
-        image={session?.image}
-        isAdmin={session?.isAdmin}
-        onSignOut={handleSignOut}
-      />
+      {/* Profile Overlay */}
+      <ProfileOverlay open={profileOpen} onClose={() => setProfileOpen(false)} />
     </>
   );
 }
