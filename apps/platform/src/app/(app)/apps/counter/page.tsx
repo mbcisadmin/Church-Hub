@@ -25,7 +25,7 @@ import {
 } from '@church/nextjs-ui/components/ResponsiveSheet';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
 type Event = {
@@ -607,8 +607,8 @@ export default function CounterPage() {
   };
 
   return (
-    <div className="bg-background pt-8 pb-8 md:pt-16">
-      <div className="mx-auto max-w-[1600px] px-4 md:px-6">
+    <div>
+      <div className="mx-auto max-w-[1600px]">
         <SectionHeader
           title="Counter"
           subtitle="Track event metrics in real-time"
@@ -638,73 +638,70 @@ export default function CounterPage() {
             </motion.div>
 
             {/* Event Selection */}
-            <AnimatePresence>
-              {selectedDate && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <h3 className="text-muted-foreground mb-4 text-xs font-semibold tracking-wide uppercase">
-                    Event
-                  </h3>
-                  {isLoadingEvents ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="text-primary h-6 w-6 animate-spin" />
-                    </div>
-                  ) : events.length === 0 ? (
-                    <div className="text-muted-foreground py-8 text-center">
-                      No events found for this date
-                    </div>
-                  ) : (
-                    <div ref={eventListRef} className="flex flex-col gap-2">
-                      {events.map((event) => {
-                        const isSelected = selectedEvent?.Event_ID === event.Event_ID;
-                        const isLoading = isSelected && isLoadingExistingMetrics;
-                        return (
-                          <ActionCard
-                            key={event.Event_ID}
-                            onClick={() => handleEventClick(event)}
-                            className={
-                              isLoadingMetrics
-                                ? 'cursor-not-allowed opacity-50'
-                                : isSelected
-                                  ? 'border-primary'
-                                  : ''
-                            }
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p
-                                className={`text-sm ${isSelected ? 'text-primary font-medium' : 'text-foreground/80'}`}
-                              >
-                                {formatEventTitle(event.Event_Title)}
-                              </p>
-                              <div
-                                className={`mt-1 inline-flex items-center gap-1 text-xs ${
-                                  isSelected ? 'text-primary/70' : 'text-muted-foreground'
-                                }`}
-                              >
-                                <Clock className="h-3 w-3" />
-                                {format(parseISO(event.Event_Start_Date), 'h:mm a')}
-                                {isLoading && <Loader2 className="ml-1 h-3 w-3 animate-spin" />}
-                              </div>
-                            </div>
-                            <ChevronRight
-                              className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1 ${
-                                isSelected
-                                  ? 'text-primary'
-                                  : 'text-muted-foreground group-hover:text-foreground'
+            {selectedDate && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h3 className="text-muted-foreground mb-4 text-xs font-semibold tracking-wide uppercase">
+                  Event
+                </h3>
+                {isLoadingEvents ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="text-primary h-6 w-6 animate-spin" />
+                  </div>
+                ) : events.length === 0 ? (
+                  <div className="text-muted-foreground py-8 text-center">
+                    No events found for this date
+                  </div>
+                ) : (
+                  <div ref={eventListRef} className="flex flex-col gap-2">
+                    {events.map((event) => {
+                      const isSelected = selectedEvent?.Event_ID === event.Event_ID;
+                      const isLoading = isSelected && isLoadingExistingMetrics;
+                      return (
+                        <ActionCard
+                          key={event.Event_ID}
+                          onClick={() => handleEventClick(event)}
+                          className={
+                            isLoadingMetrics
+                              ? 'cursor-not-allowed opacity-50'
+                              : isSelected
+                                ? 'border-primary'
+                                : ''
+                          }
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p
+                              className={`text-sm ${isSelected ? 'text-primary font-medium' : 'text-foreground/80'}`}
+                            >
+                              {formatEventTitle(event.Event_Title)}
+                            </p>
+                            <div
+                              className={`mt-1 inline-flex items-center gap-1 text-xs ${
+                                isSelected ? 'text-primary/70' : 'text-muted-foreground'
                               }`}
-                            />
-                          </ActionCard>
-                        );
-                      })}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                            >
+                              <Clock className="h-3 w-3" />
+                              {format(parseISO(event.Event_Start_Date), 'h:mm a')}
+                              {isLoading && <Loader2 className="ml-1 h-3 w-3 animate-spin" />}
+                            </div>
+                          </div>
+                          <ChevronRight
+                            className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1 ${
+                              isSelected
+                                ? 'text-primary'
+                                : 'text-muted-foreground group-hover:text-foreground'
+                            }`}
+                          />
+                        </ActionCard>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

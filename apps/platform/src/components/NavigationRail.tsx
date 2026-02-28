@@ -153,6 +153,7 @@ const DYNAMIC_SECTIONS = [
     items: [
       { label: 'Campus Map', route: '/facilities/map' },
       { label: 'Equipment', route: '/facilities/equipment' },
+      { label: 'Room Manager', route: '/facilities/room-manager' },
       { label: 'Room Reservations', route: '/facilities/rooms' },
     ],
     addAction: { label: 'Reserve', route: '/facilities/reserve' },

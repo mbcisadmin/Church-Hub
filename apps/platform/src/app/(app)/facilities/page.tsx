@@ -57,6 +57,13 @@ const FACILITIES_APPS = [
     route: '/facilities/map',
   },
   {
+    id: 'room-manager',
+    name: 'Room Manager',
+    description: 'Manage event room assignments and check-ins',
+    icon: DoorOpen,
+    route: '/facilities/room-manager',
+  },
+  {
     id: 'rooms',
     name: 'Room Reservations',
     description: 'Book rooms and spaces',
