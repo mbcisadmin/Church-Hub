@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-type Congregation = {
+export type Congregation = {
   Congregation_ID: number;
   Congregation_Name: string;
 };
@@ -16,12 +16,22 @@ type CampusContextType = {
 
 const CampusContext = createContext<CampusContextType | undefined>(undefined);
 
+/**
+ * Sort congregations: Congregation_ID === 1 first, then alphabetical
+ */
+function sortCongregations(congregations: Congregation[]): Congregation[] {
+  return [...congregations].sort((a, b) => {
+    if (a.Congregation_ID === 1) return -1;
+    if (b.Congregation_ID === 1) return 1;
+    return a.Congregation_Name.localeCompare(b.Congregation_Name);
+  });
+}
+
 export function CampusProvider({ children }: { children: ReactNode }) {
   const [selectedCampus, setSelectedCampus] = useState<Congregation | null>(null);
   const [congregations, setCongregations] = useState<Congregation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load congregations on mount
   useEffect(() => {
     async function loadCongregations() {
       try {
@@ -29,19 +39,16 @@ export function CampusProvider({ children }: { children: ReactNode }) {
         if (!response.ok) throw new Error('Failed to fetch congregations');
         const data = await response.json();
 
-        const congregationsList = data.congregations || data;
-        setCongregations(congregationsList);
+        const sorted = sortCongregations(data.congregations || data);
+        setCongregations(sorted);
 
-        // Auto-select first congregation if available
-        if (congregationsList.length > 0 && !selectedCampus) {
-          // Try to use user's Web Congregation preference
-          if (data.userWebCongregation) {
-            const userCampus = congregationsList.find(
-              (c: Congregation) => c.Congregation_ID === data.userWebCongregation
-            );
-            setSelectedCampus(userCampus || congregationsList[0]);
+        // Auto-select based on household congregation, or first in list
+        if (sorted.length > 0 && !selectedCampus) {
+          if (data.userDefaultCongregation) {
+            const match = sorted.find((c) => c.Congregation_ID === data.userDefaultCongregation);
+            setSelectedCampus(match || sorted[0]);
           } else {
-            setSelectedCampus(congregationsList[0]);
+            setSelectedCampus(sorted[0]);
           }
         }
       } catch (error) {

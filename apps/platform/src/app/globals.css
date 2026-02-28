@@ -217,25 +217,14 @@ input[type='submit'],
   letter-spacing: 0.025em;
 }
 
-/* Button Hover Transitions */
+/* Button Hover Transitions — opt-in via .btn class only */
 @media only screen and (hover: hover) {
-  /* Exclude buttons with custom hover states from global hover */
-  button:not([class*='hover:bg-']):not([class*='hover:border-']):hover,
-  button[type='button']:not([class*='hover:bg-']):not([class*='hover:border-']):hover,
-  button[type='submit']:not([class*='hover:bg-']):not([class*='hover:border-']):hover,
   input[type='submit']:hover,
   .btn:hover {
     background: var(--brand-secondary);
     border-color: var(--brand-secondary);
     color: oklch(1 0 0); /* White text for contrast */
     transition: all 0.2s ease-in-out;
-  }
-
-  /* Preserve variant-specific hovers for ghost/outline buttons */
-  button[class*='variant-ghost']:hover,
-  button[class*='variant-outline']:hover {
-    background: oklch(0.19 0.025 240 / 0.1);
-    border-color: var(--brand-secondary);
   }
 }
 

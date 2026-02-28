@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@church/nextjs-auth';
-import { getCongregations } from '@/services/counterService';
+import { getCongregations, getHouseholdCongregation } from '@/services/counterService';
 
 export async function GET() {
   try {
@@ -10,11 +10,16 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const congregations = await getCongregations();
+    const householdId = session.householdId ? parseInt(session.householdId, 10) : null;
+
+    const [congregations, householdCongregation] = await Promise.all([
+      getCongregations(),
+      householdId ? getHouseholdCongregation(householdId) : Promise.resolve(null),
+    ]);
 
     return NextResponse.json({
       congregations,
-      userWebCongregation: null, // Could be enhanced to get from user profile
+      userDefaultCongregation: householdCongregation,
     });
   } catch (error) {
     console.error('Error fetching congregations:', error);

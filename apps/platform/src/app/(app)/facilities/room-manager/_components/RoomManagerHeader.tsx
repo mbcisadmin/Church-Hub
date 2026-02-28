@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Loader2, Users, UserCheck, User } from 'lucide-react';
 import { DateSwiper } from '@church/nextjs-ui/date-swiper';
+import { useCampus } from '@/contexts/CampusContext';
 import type { RoomManagerData } from '@/types/roomManager';
 
 type Event = {
@@ -11,11 +12,6 @@ type Event = {
   Event_Title: string;
   Event_Start_Date: string;
   Event_End_Date: string;
-};
-
-type Congregation = {
-  Congregation_ID: number;
-  Congregation_Name: string;
 };
 
 interface RoomManagerHeaderProps {
@@ -33,29 +29,9 @@ export default function RoomManagerHeader({
   onEventChange,
   data,
 }: RoomManagerHeaderProps) {
-  const [congregations, setCongregations] = useState<Congregation[]>([]);
-  const [selectedCongregationId, setSelectedCongregationId] = useState<number | null>(null);
+  const { selectedCampus } = useCampus();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
-
-  // Load congregations on mount
-  useEffect(() => {
-    async function loadCongregations() {
-      try {
-        const response = await fetch('/api/counter/congregations');
-        if (!response.ok) throw new Error('Failed to fetch congregations');
-        const data = await response.json();
-        const list: Congregation[] = data.congregations || data;
-        setCongregations(list);
-        if (list.length > 0) {
-          setSelectedCongregationId(list[0].Congregation_ID);
-        }
-      } catch (error) {
-        console.error('Error loading congregations:', error);
-      }
-    }
-    loadCongregations();
-  }, []);
 
   // Load events when date or campus changes
   useEffect(() => {
@@ -68,8 +44,8 @@ export default function RoomManagerHeader({
       setIsLoadingEvents(true);
       try {
         let url = `/api/counter/events?date=${selectedDate}`;
-        if (selectedCongregationId) {
-          url += `&congregationId=${selectedCongregationId}`;
+        if (selectedCampus) {
+          url += `&congregationId=${selectedCampus.Congregation_ID}`;
         }
         const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch events');
@@ -89,7 +65,7 @@ export default function RoomManagerHeader({
     }
 
     loadEvents();
-  }, [selectedDate, selectedCongregationId]);
+  }, [selectedDate, selectedCampus?.Congregation_ID]);
 
   // Compute stats from data
   const totalAttending = data?.participants.filter((p) => p.Time_In && !p.Time_Out).length ?? 0;
@@ -100,26 +76,6 @@ export default function RoomManagerHeader({
 
   return (
     <div className="space-y-4">
-      {/* Campus Picker */}
-      {congregations.length > 1 && (
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={selectedCongregationId ?? ''}
-            onChange={(e) => {
-              setSelectedCongregationId(parseInt(e.target.value));
-              onEventChange(null);
-            }}
-            className="border-input bg-background text-foreground h-9 border px-3 text-sm focus:ring-2 focus:outline-none"
-          >
-            {congregations.map((c) => (
-              <option key={c.Congregation_ID} value={c.Congregation_ID}>
-                {c.Congregation_Name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
       {/* Date Swiper */}
       <DateSwiper
         value={selectedDate}

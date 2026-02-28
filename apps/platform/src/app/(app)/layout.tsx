@@ -5,6 +5,7 @@ import ChurchLogo from '@/components/ChurchLogo';
 import Footer from '@church/nextjs-ui/components/Footer';
 import { MainScrollContainer } from '@/components/MainScrollContainer';
 import { TestingParamsProvider } from '@/components/TestingParamsProvider';
+import { CampusProvider } from '@/contexts/CampusContext';
 import { ContactActionProvider } from '@/components/ContactActionProvider';
 import { PageActionsProvider, MobileActionBar } from '@church/nextjs-ui/page-actions';
 import { churchConfig, footerLinks } from '@/config/church';
@@ -32,34 +33,36 @@ export default async function AppLayout({
   return (
     <Suspense>
       <TestingParamsProvider>
-        <ContactActionProvider>
-          <PageActionsProvider>
-            <div className="app-grid">
-              {/* Header — spans full width via grid-template-areas */}
-              <div className="z-50 [grid-area:header]">
-                <AppHeader />
+        <CampusProvider>
+          <ContactActionProvider>
+            <PageActionsProvider>
+              <div className="app-grid">
+                {/* Header — spans full width via grid-template-areas */}
+                <div className="z-50 [grid-area:header]">
+                  <AppHeader />
+                </div>
+
+                {/* Navigation rail — occupies 'nav' grid area on md+ */}
+                <NavigationRail />
+
+                {/* Main content — scrollable within its grid cell */}
+                <div className="main-wrapper relative flex flex-col overflow-hidden [grid-area:main]">
+                  <MainScrollContainer footer={<div className="md:hidden">{footer}</div>}>
+                    <main className="bg-background relative min-w-0 flex-1 px-4 py-12 md:px-6 md:py-16 lg:px-8">
+                      {children}
+                    </main>
+                  </MainScrollContainer>
+                </div>
+
+                {/* Footer — desktop only, own grid row */}
+                <div className="hidden shrink-0 [grid-area:footer] md:block">{footer}</div>
               </div>
 
-              {/* Navigation rail — occupies 'nav' grid area on md+ */}
-              <NavigationRail />
-
-              {/* Main content — scrollable within its grid cell */}
-              <div className="main-wrapper relative flex flex-col overflow-hidden [grid-area:main]">
-                <MainScrollContainer footer={<div className="md:hidden">{footer}</div>}>
-                  <main className="bg-background relative min-w-0 flex-1 px-4 py-12 md:px-6 md:py-16 lg:px-8">
-                    {children}
-                  </main>
-                </MainScrollContainer>
-              </div>
-
-              {/* Footer — desktop only, own grid row */}
-              <div className="hidden shrink-0 [grid-area:footer] md:block">{footer}</div>
-            </div>
-
-            {/* Mobile action bar — reads from PageActionsContext */}
-            <MobileActionBar />
-          </PageActionsProvider>
-        </ContactActionProvider>
+              {/* Mobile action bar — reads from PageActionsContext */}
+              <MobileActionBar />
+            </PageActionsProvider>
+          </ContactActionProvider>
+        </CampusProvider>
       </TestingParamsProvider>
     </Suspense>
   );

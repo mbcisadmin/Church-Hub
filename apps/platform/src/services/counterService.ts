@@ -136,3 +136,18 @@ export async function updateEventMetric(
 export async function deleteEventMetric(eventMetricId: number, userId: number): Promise<void> {
   await tableService.deleteTableRecords('Event_Metrics', [eventMetricId], { $userId: userId });
 }
+
+/**
+ * Get the congregation ID from a household record
+ */
+export async function getHouseholdCongregation(householdId: number): Promise<number | null> {
+  const rows = await tableService.getTableRecords<{ Congregation_ID: number | null }>(
+    'Households',
+    {
+      $filter: `Household_ID = ${householdId}`,
+      $select: 'Congregation_ID',
+      $top: 1,
+    }
+  );
+  return rows[0]?.Congregation_ID ?? null;
+}
