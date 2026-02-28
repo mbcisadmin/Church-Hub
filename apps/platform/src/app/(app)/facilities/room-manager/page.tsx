@@ -3,13 +3,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { DoorOpen, Loader2 } from 'lucide-react';
-import { ResponsiveSheet, SheetPage } from '@church/nextjs-ui/components/ResponsiveSheet';
 import { SectionHeader } from '@/components/ui/section-header';
 import RoomManagerHeader from './_components/RoomManagerHeader';
 import FilterBar, { type FilterMode } from './_components/FilterBar';
 import RoomCard from './_components/RoomCard';
-import GroupPanel from './_components/GroupPanel';
-import PeoplePanel from './_components/PeoplePanel';
+import RoomDetailSheet from './_components/RoomDetailSheet';
 import { useRoomManagerData } from './_components/useRoomManagerData';
 
 export default function RoomManagerPage() {
@@ -27,8 +25,7 @@ export default function RoomManagerPage() {
   const [searchText, setSearchText] = useState('');
 
   // Sheet state
-  const [groupsSheetOpen, setGroupsSheetOpen] = useState(false);
-  const [peopleSheetOpen, setPeopleSheetOpen] = useState(false);
+  const [roomDetailOpen, setRoomDetailOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
 
   // Data
@@ -75,14 +72,9 @@ export default function RoomManagerPage() {
   const selectedRoomParticipants =
     data?.participants.filter((p) => p.Room_ID === selectedRoomId) ?? [];
 
-  const openGroupsSheet = (roomId: number) => {
+  const openRoomDetail = (roomId: number) => {
     setSelectedRoomId(roomId);
-    setGroupsSheetOpen(true);
-  };
-
-  const openPeopleSheet = (roomId: number) => {
-    setSelectedRoomId(roomId);
-    setPeopleSheetOpen(true);
+    setRoomDetailOpen(true);
   };
 
   return (
@@ -145,6 +137,7 @@ export default function RoomManagerPage() {
                     eventRooms={eventRooms}
                     participants={participants}
                     highlighted={highlightedRoomIds.has(room.Room_ID)}
+                    onClick={() => openRoomDetail(room.Room_ID)}
                     onCloseAll={() => {
                       const openIds = eventRooms
                         .filter((er) => !er.Closed)
@@ -157,8 +150,6 @@ export default function RoomManagerPage() {
                         });
                       }
                     }}
-                    onOpenGroups={() => openGroupsSheet(room.Room_ID)}
-                    onOpenPeople={() => openPeopleSheet(room.Room_ID)}
                   />
                 ))}
               </div>
@@ -181,38 +172,16 @@ export default function RoomManagerPage() {
         </div>
       </div>
 
-      {/* Groups Sheet */}
-      <ResponsiveSheet
-        open={groupsSheetOpen}
-        onClose={() => setGroupsSheetOpen(false)}
-        panelClassName="bg-card overflow-hidden"
-        maxWidth="max-w-2xl"
-      >
-        <SheetPage name="main" title={`Groups — ${selectedRoom?.Room_Name ?? ''}`}>
-          <GroupPanel
-            eventRooms={selectedRoomEventRooms}
-            roomName={selectedRoom?.Room_Name ?? ''}
-            onAction={executeAction}
-          />
-        </SheetPage>
-      </ResponsiveSheet>
-
-      {/* People Sheet */}
-      <ResponsiveSheet
-        open={peopleSheetOpen}
-        onClose={() => setPeopleSheetOpen(false)}
-        panelClassName="bg-card overflow-hidden"
-        maxWidth="max-w-2xl"
-      >
-        <SheetPage name="main" title={`People — ${selectedRoom?.Room_Name ?? ''}`}>
-          <PeoplePanel
-            participants={selectedRoomParticipants}
-            rooms={data?.rooms ?? []}
-            roomName={selectedRoom?.Room_Name ?? ''}
-            onAction={executeAction}
-          />
-        </SheetPage>
-      </ResponsiveSheet>
+      {/* Room Detail Sheet */}
+      <RoomDetailSheet
+        open={roomDetailOpen}
+        onClose={() => setRoomDetailOpen(false)}
+        room={selectedRoom ?? null}
+        eventRooms={selectedRoomEventRooms}
+        participants={selectedRoomParticipants}
+        allRooms={data?.rooms ?? []}
+        onAction={executeAction}
+      />
     </div>
   );
 }

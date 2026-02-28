@@ -9,9 +9,8 @@ interface RoomCardProps {
   eventRooms: EventRoom[];
   participants: EventParticipant[];
   highlighted: boolean;
+  onClick: () => void;
   onCloseAll: () => void;
-  onOpenGroups: () => void;
-  onOpenPeople: () => void;
 }
 
 export default function RoomCard({
@@ -19,9 +18,8 @@ export default function RoomCard({
   eventRooms,
   participants,
   highlighted,
+  onClick,
   onCloseAll,
-  onOpenGroups,
-  onOpenPeople,
 }: RoomCardProps) {
   const checkedIn = participants.filter((p) => p.Time_In && !p.Time_Out).length;
   const maxCapacity = room.Maximum_Capacity;
@@ -44,8 +42,10 @@ export default function RoomCard({
   const isAnyLoading = eventRooms.some((er) => er._loading);
 
   return (
-    <div
-      className={`bg-card border transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${
+    <button
+      type="button"
+      onClick={onClick}
+      className={`bg-card cursor-pointer border text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${
         highlighted ? 'border-primary ring-primary/20 ring-2' : 'border-border'
       }`}
     >
@@ -100,34 +100,21 @@ export default function RoomCard({
       </div>
 
       {/* Actions */}
-      <div className="border-border flex items-center gap-1 border-t px-2 py-1.5">
-        {eventRooms.length > 0 && openGroups > 0 && (
+      {eventRooms.length > 0 && openGroups > 0 && (
+        <div className="border-border flex items-center gap-1 border-t px-2 py-1.5">
           <Button
             size="sm"
             variant="ghost"
-            onClick={onCloseAll}
+            onClick={(e) => {
+              e.stopPropagation();
+              onCloseAll();
+            }}
             className="text-destructive hover:text-destructive h-7 rounded-none text-xs"
           >
             Close All
           </Button>
-        )}
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onOpenGroups}
-          className="h-7 rounded-none text-xs"
-        >
-          Groups ({eventRooms.length})
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onOpenPeople}
-          className="h-7 rounded-none text-xs"
-        >
-          People ({checkedIn})
-        </Button>
-      </div>
-    </div>
+        </div>
+      )}
+    </button>
   );
 }
