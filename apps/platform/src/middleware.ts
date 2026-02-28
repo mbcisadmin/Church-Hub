@@ -12,8 +12,8 @@ function parseTenantSlug(hostname: string): { slug: string | null; isCustomDomai
   // Strip port for comparison
   const host = hostname.split(':')[0];
 
-  // localhost / 127.0.0.1 → single-tenant mode
-  if (host === 'localhost' || host === '127.0.0.1') {
+  // localhost / 127.0.0.1 / *.vercel.app → single-tenant mode
+  if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.vercel.app')) {
     return { slug: null, isCustomDomain: false };
   }
 
