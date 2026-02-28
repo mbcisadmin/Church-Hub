@@ -61,8 +61,8 @@ export async function middleware(request: NextRequest) {
       'x-tenant-id': tenant.id,
       'x-tenant-slug': tenant.slug,
       'x-tenant-name': tenant.name,
-      'x-tenant-mp-domain': tenant.mpDomain,
-      'x-tenant-mp-client-id': tenant.mpClientId,
+      'x-tenant-mp-domain': tenant.mpDomain ?? '',
+      'x-tenant-mp-client-id': tenant.mpClientId ?? '',
       'x-tenant-logo-url': tenant.logoUrl ?? '',
       'x-tenant-primary-color': tenant.primaryColor ?? '',
     };
@@ -77,8 +77,8 @@ export async function middleware(request: NextRequest) {
       'x-tenant-id': tenant.id,
       'x-tenant-slug': tenant.slug,
       'x-tenant-name': tenant.name,
-      'x-tenant-mp-domain': tenant.mpDomain,
-      'x-tenant-mp-client-id': tenant.mpClientId,
+      'x-tenant-mp-domain': tenant.mpDomain ?? '',
+      'x-tenant-mp-client-id': tenant.mpClientId ?? '',
       'x-tenant-logo-url': tenant.logoUrl ?? '',
       'x-tenant-primary-color': tenant.primaryColor ?? '',
     };
