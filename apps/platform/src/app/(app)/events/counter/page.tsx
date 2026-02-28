@@ -25,6 +25,7 @@ import {
 } from '@church/nextjs-ui/components/ResponsiveSheet';
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
+import { useCampus } from '@/contexts/CampusContext';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -290,6 +291,8 @@ function MetricsList({
 }
 
 export default function CounterPage() {
+  const { selectedCampus } = useCampus();
+
   useEffect(() => {
     document.title = 'Counter | The Hub';
   }, []);
@@ -367,7 +370,11 @@ export default function CounterPage() {
     async function loadEvents() {
       setIsLoadingEvents(true);
       try {
-        const response = await fetch(`/api/counter/events?date=${selectedDate}`);
+        let url = `/api/counter/events?date=${selectedDate}`;
+        if (selectedCampus) {
+          url += `&congregationId=${selectedCampus.Congregation_ID}`;
+        }
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Failed to fetch events');
         const data = await response.json();
         setEvents(data);
@@ -380,7 +387,7 @@ export default function CounterPage() {
     }
 
     loadEvents();
-  }, [selectedDate]);
+  }, [selectedDate, selectedCampus?.Congregation_ID]);
 
   // Handle event click - fetch metrics and open sheet
   const handleEventClick = async (event: Event) => {

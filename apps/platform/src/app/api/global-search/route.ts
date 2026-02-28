@@ -27,7 +27,7 @@ const APPS: SearchableApp[] = [
     name: 'Counter',
     description: 'Event attendance and metrics tracking',
     icon: 'calculator',
-    route: '/apps/counter',
+    route: '/events/counter',
     type: 'app',
     searchable: false,
     search_endpoint: null,
