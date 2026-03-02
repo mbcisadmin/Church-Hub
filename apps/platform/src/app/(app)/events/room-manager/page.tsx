@@ -328,21 +328,6 @@ export default function RoomManagerPage() {
                   <div className="space-y-10">
                     {/* Search, Room filter & Show All toggle */}
                     <div className="flex items-end gap-3">
-                      <div className="flex-1">
-                        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-                          Search
-                        </label>
-                        <div className="relative">
-                          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                          <input
-                            type="text"
-                            placeholder="Search people..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary h-10 w-full rounded-lg border pr-3 pl-9 text-sm focus:ring-2 focus:outline-none"
-                          />
-                        </div>
-                      </div>
                       <div className="shrink-0">
                         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
                           Room
@@ -397,6 +382,21 @@ export default function RoomManagerPage() {
                             <Users className="h-4 w-4" />
                           </div>
                         </button>
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
+                          Search
+                        </label>
+                        <div className="relative">
+                          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            placeholder="Search people..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="border-input bg-background text-foreground placeholder:text-muted-foreground focus:ring-primary h-10 w-full rounded-lg border pr-3 pl-9 text-sm focus:ring-2 focus:outline-none"
+                          />
+                        </div>
                       </div>
                     </div>
 

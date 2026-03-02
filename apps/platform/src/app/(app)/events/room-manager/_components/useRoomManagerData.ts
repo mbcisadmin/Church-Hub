@@ -167,7 +167,7 @@ export function useRoomManagerData(eventId: number | null) {
                   ...prev,
                   participants: prev.participants.map((p) =>
                     p.Event_Participant_ID === action.eventParticipantId
-                      ? { ...p, Time_in: localISOString(), Time_Out: null, _loading: true }
+                      ? { ...p, Time_Out: null, _loading: true }
                       : p
                   ),
                 }

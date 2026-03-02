@@ -51,11 +51,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'checkIn':
-        await updateEventParticipant(
-          action.eventParticipantId,
-          { Time_In: new Date().toISOString(), Time_Out: null },
-          userId
-        );
+        await updateEventParticipant(action.eventParticipantId, { Time_Out: null }, userId);
         break;
 
       case 'changeRoom':
