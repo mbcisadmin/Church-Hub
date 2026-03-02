@@ -135,9 +135,15 @@ These are unique to the apps platform project.
    - Click **"Add"**
 
 2. **Configure DNS**
-   - Vercel will provide DNS instructions
-   - Add the CNAME record to McLean's DNS provider
+   - Vercel will provide DNS instructions (A record for root, CNAME for
+     subdomains)
+   - Add the records to McLean's DNS provider
+   - If Vercel recommends a project-specific CNAME (e.g.,
+     `*.vercel-dns-016.com`), use that instead of the generic
+     `cname.vercel-dns.com`
    - Wait for SSL certificate to provision (~10-15 minutes)
+   - **Dev subdomain** (`mclean.churchhub.dev`): Add CNAME in GoDaddy for
+     `churchhub.dev` → see root `CLAUDE.md` DNS Strategy section
 
 3. **Update NEXTAUTH_URL**
    - Go to **"Environment Variables"**

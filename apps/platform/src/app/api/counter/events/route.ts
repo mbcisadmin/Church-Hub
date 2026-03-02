@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@church/nextjs-auth';
-import { getEvents } from '@/services/counterService';
+import { getEvents, getEventsWithRooms } from '@/services/counterService';
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,7 +19,10 @@ export async function GET(request: NextRequest) {
     }
 
     const congregationId = congregationIdParam ? parseInt(congregationIdParam) : null;
-    const events = await getEvents(date, congregationId);
+    const requireRooms = searchParams.get('requireRooms') === 'true';
+    const events = requireRooms
+      ? await getEventsWithRooms(date, congregationId)
+      : await getEvents(date, congregationId);
 
     return NextResponse.json(events);
   } catch (error) {

@@ -151,7 +151,7 @@ export function DateSwiper({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && handlePrev()}
-        className="absolute top-0 left-0 z-[5] h-full w-[40%] cursor-pointer"
+        className="absolute top-0 left-0 z-[5] h-full w-1/2 cursor-pointer"
         aria-label="Previous day"
       />
       <div
@@ -159,7 +159,7 @@ export function DateSwiper({
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && handleNext()}
-        className="absolute top-0 right-0 z-[5] h-full w-[40%] cursor-pointer"
+        className="absolute top-0 right-0 z-[5] h-full w-1/2 cursor-pointer"
         aria-label="Next day"
       />
 

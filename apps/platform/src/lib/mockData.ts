@@ -70,38 +70,6 @@ export const PINNED_DASHBOARDS: PinnedDashboard[] = [
     statLabel: 'people',
     category: 'Engagement',
   },
-  {
-    id: 'giving',
-    label: 'Giving',
-    route: '/analytics/dashboards/giving',
-    stat: '$182k',
-    statLabel: 'MTD',
-    category: 'Finance',
-  },
-  {
-    id: 'attendance',
-    label: 'Attendance',
-    route: '/analytics/dashboards/attendance',
-    stat: '1,247',
-    statLabel: 'avg',
-    category: 'Weekend',
-  },
-  {
-    id: 'volunteers',
-    label: 'Volunteers',
-    route: '/analytics/dashboards/volunteers',
-    stat: '342',
-    statLabel: 'active',
-    category: 'Serving',
-  },
-  {
-    id: 'groups',
-    label: 'Groups',
-    route: '/analytics/dashboards/groups',
-    stat: '89',
-    statLabel: 'active',
-    category: 'Community',
-  },
 ];
 
 // ============================================================================
@@ -433,39 +401,23 @@ export function getAppsForLevel(level: AccessLevel | null): PinnedApp[] {
  * Dynamic section IDs that appear in navigation.
  * These are filtered based on access level.
  */
-export const DYNAMIC_SECTION_IDS = [
-  'analytics',
-  'announcements',
-  'church',
-  'discipleship',
-  'facilities',
-  'finance',
-  'prayer',
-  'staff',
-] as const;
+export const DYNAMIC_SECTION_IDS = ['analytics'] as const;
 
 export type DynamicSectionId = (typeof DYNAMIC_SECTION_IDS)[number];
 
 /**
  * Get which dynamic sections should be visible for a given access level.
  * Returns an array of section IDs that should be shown.
- *
- * - low: Prayer, Discipleship (personal growth focused)
- * - medium: Add Announcements, Church, Finance
- * - high: All sections including Facilities, Staff, Analytics
  */
 export function getDynamicSectionsForLevel(level: AccessLevel | null): DynamicSectionId[] {
-  if (!level) return [...DYNAMIC_SECTION_IDS]; // No filtering when no level set
+  if (!level) return [...DYNAMIC_SECTION_IDS];
 
   switch (level) {
     case 'low':
-      // New volunteers: just personal growth and prayer
-      return ['discipleship', 'prayer'];
+      return [];
     case 'medium':
-      // Regular staff: most sections except admin-only
-      return ['announcements', 'church', 'discipleship', 'finance', 'prayer'];
+      return ['analytics'];
     case 'high':
-      // Admin/leadership: all sections
       return [...DYNAMIC_SECTION_IDS];
   }
 }
@@ -487,10 +439,6 @@ export function getNavPinnedItems(level: AccessLevel | null) {
         route: g.route,
       })),
     /** Individual nav items the user has pinned (shown with pin icon, used for pin filter). */
-    items: [
-      { label: 'Quick Facts', route: '/analytics/quick-facts' },
-      { label: 'Counter', route: '/events/counter' },
-      { label: 'Search', route: '/people/search' },
-    ],
+    items: [] as Array<{ label: string; route: string }>,
   };
 }

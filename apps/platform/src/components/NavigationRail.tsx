@@ -12,40 +12,15 @@ import {
   Filter,
   Loader2,
   BarChart3,
-  Rocket,
-  Home,
-  Heart,
   HandCoins,
-  Users,
-  UserCircle,
-  Calendar,
   CalendarDays,
-  CalendarPlus,
-  CalendarSearch,
-  ClipboardList,
-  AlertTriangle,
   UsersRound,
-  UserPlus,
   Handshake,
-  HandHeart,
-  MessageSquareHeart,
-  PiggyBank,
-  Megaphone,
   Plus,
   Contact,
-  User,
-  HomeIcon,
-  Footprints,
-  Wallet,
-  Church,
-  Briefcase,
-  Building2,
-  Ticket,
   Pin,
 } from 'lucide-react';
-import { Icon } from '@/lib/icons';
 import { ScrollIndicator } from '@church/nextjs-ui/components/ScrollIndicator';
-import ChurchLogo from '@/components/ChurchLogo';
 import { useTestingContext } from '@/components/TestingParamsProvider';
 import { getNavPinnedItems, getDynamicSectionsForLevel } from '@/lib/mockData';
 import { usePreserveParams } from '@/lib/usePreserveParams';
@@ -68,150 +43,52 @@ const PRIMARY_SECTIONS = [
     icon: CalendarDays,
     basePath: '/events',
     items: [
-      { label: 'Calendar', route: '/events/calendar' },
-      { label: 'Cancellations', route: '/events/cancellations' },
       { label: 'Counter', route: '/events/counter' },
-      { label: 'Finder', route: '/events/finder' },
       { label: 'Room Manager', route: '/events/room-manager' },
-      { label: 'Registration', route: '/events/registration' },
-      { label: 'Ticketed', route: '/events/ticketed' },
     ],
-    addAction: { label: 'New', route: '/events/new' },
+    addAction: { label: 'New', route: 'https://my.mcleanbible.org/mp/308/0' },
   },
   {
     id: 'giving',
     label: 'Giving',
     icon: HandCoins,
     basePath: '/giving',
-    items: [{ label: 'Overview', route: '/giving' }],
-    addAction: { label: 'Give Now', route: '/giving/new' },
+    items: [],
   },
   {
     id: 'groups',
     label: 'Groups',
     icon: UsersRound,
     basePath: '/groups',
-    items: [
-      { label: 'All', route: '/groups' },
-      { label: 'Find', route: '/groups/finder' },
-    ],
-    addAction: { label: 'New', route: '/groups/add' },
+    items: [],
+    addAction: { label: 'New', route: 'https://my.mcleanbible.org/mp/322/0' },
   },
   {
     id: 'people',
     label: 'People',
     icon: Contact,
     basePath: '/people',
-    items: [
-      { label: 'Directory', route: '/people/directory' },
-      { label: 'Search', route: '/people/search' },
-    ],
-    addAction: { label: 'New', route: '/people/add' },
+    items: [{ label: 'Search', route: '/people/search' }],
   },
   {
     id: 'serve',
     label: 'Serve',
     icon: Handshake,
     basePath: '/serve',
-    items: [{ label: 'Opportunities', route: '/serve' }],
-    addAction: { label: 'New', route: '/serve/add' },
+    items: [],
+    addAction: { label: 'New', route: 'https://my.mcleanbible.org/mp/348/0' },
   },
 ];
 
-// Dynamic sections (alphabetized)
-// addAction: optional "Add" button shown at bottom of section (could be internal or external URL in Neon)
-const DYNAMIC_SECTIONS = [
-  {
-    id: 'announcements',
-    label: 'Announcements',
-    icon: Megaphone,
-    basePath: '/announcements',
-    items: [
-      { label: 'All', route: '/announcements' },
-      { label: 'Mine', route: '/announcements/my' },
-      { label: 'View', route: '/announcements/view' },
-      { label: 'Widget', route: '/announcements/widget' },
-    ],
-    addAction: { label: 'New', route: '/announcements/create' },
-  },
-  {
-    id: 'church',
-    label: 'Church',
-    icon: Church,
-    basePath: '/church',
-    items: [
-      { label: 'Care Teams', route: '/church/care-teams' },
-      { label: 'Directory', route: '/church/directory' },
-      { label: 'Overview', route: '/church' },
-      { label: 'Volunteers', route: '/church/volunteers' },
-    ],
-  },
-  {
-    id: 'facilities',
-    label: 'Facilities',
-    icon: Building2,
-    basePath: '/facilities',
-    items: [
-      { label: 'Campus Map', route: '/facilities/map' },
-      { label: 'Equipment', route: '/facilities/equipment' },
-      { label: 'Room Reservations', route: '/facilities/rooms' },
-    ],
-    addAction: { label: 'Reserve', route: '/facilities/reserve' },
-  },
-  {
-    id: 'finance',
-    label: 'Finance',
-    icon: Wallet,
-    basePath: '/finance',
-    items: [
-      { label: 'Budget Requests', route: '/finance/budget-requests' },
-      { label: 'Invoices', route: '/finance/invoices' },
-      { label: 'Overview', route: '/finance' },
-      { label: 'P-Card', route: '/finance/p-card' },
-      { label: 'Reports', route: '/finance/reports' },
-    ],
-    addAction: { label: 'Request', route: '/finance/request' },
-  },
-  {
-    id: 'discipleship',
-    label: 'Discipleship',
-    icon: Heart,
-    basePath: '/discipleship',
-    items: [
-      { label: 'Baptism', route: '/discipleship/baptism' },
-      { label: 'Classes', route: '/discipleship/classes' },
-      { label: 'Growth Track', route: '/discipleship/growth-track' },
-      { label: 'Membership', route: '/discipleship/membership' },
-      { label: 'My Journey', route: '/discipleship/my-journey' },
-    ],
-    addAction: { label: 'New Journey', route: '/discipleship/new' },
-  },
-  {
-    id: 'prayer',
-    label: 'Prayer',
-    icon: HandHeart,
-    basePath: '/prayer',
-    items: [
-      { label: 'All Requests', route: '/prayer' },
-      { label: 'My Requests', route: '/prayer/my-requests' },
-      { label: 'Praying For', route: '/prayer/praying-for' },
-    ],
-    addAction: { label: 'New', route: '/prayer/submit' },
-  },
-  {
-    id: 'staff',
-    label: 'Staff',
-    icon: Briefcase,
-    basePath: '/staff',
-    items: [
-      { label: 'Directory', route: '/staff' },
-      { label: 'HR Portal', route: '/staff/hr' },
-      { label: 'Resources', route: '/staff/resources' },
-      { label: 'Training', route: '/staff/training' },
-    ],
-    addAction: { label: 'New', route: '/staff/add' },
-  },
-];
+// Dynamic sections — currently empty (removed scaffold sections)
+const DYNAMIC_SECTIONS: Array<{
+  id: string;
+  label: string;
+  icon: typeof BarChart3;
+  basePath: string;
+  items: Array<{ label: string; route: string }>;
+  addAction?: { label: string; route: string };
+}> = [];
 
 // All sections combined for path matching
 const ALL_SECTIONS = [...PRIMARY_SECTIONS, ...DYNAMIC_SECTIONS];
@@ -571,18 +448,8 @@ export default function NavigationRail() {
                       label: 'Analytics',
                       icon: BarChart3,
                       basePath: '/analytics',
-                      items: [
-                        { label: 'Dashboards', route: '/analytics/dashboards' },
-                        { label: 'Exports', route: '/analytics/exports' },
-                        { label: 'Goals', route: '/analytics/goals' },
-                        { label: 'Google', route: 'https://analytics.google.com' },
-                        { label: 'Quick Facts', route: '/analytics/quick-facts' },
-                        { label: 'Reports', route: '/analytics/reports' },
-                        { label: 'Snapshots', route: '/analytics/snapshots' },
-                        { label: 'Trends', route: '/analytics/trends' },
-                      ],
+                      items: [{ label: 'Dashboards', route: '/analytics/dashboards' }],
                       pinnedItems: navPinnedItems.dashboards,
-                      addAction: { label: 'New', route: '/analytics/request' },
                     });
                   }
 

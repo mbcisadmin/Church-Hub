@@ -30,6 +30,50 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
   const participants = (result[3] || []) as EventParticipant[];
   const groups = (result[4] || []) as EventGroup[];
 
+  // Fetch profile image GUIDs from Contacts table via Participant_Record
+  const fileBaseUrl = process.env.NEXT_PUBLIC_MINISTRY_PLATFORM_FILE_URL;
+  let imageMap = new Map<number, string>();
+
+  if (fileBaseUrl && participants.length > 0) {
+    const participantIds = participants.map((p) => p.Participant_ID).filter((id) => id != null);
+
+    // Batch in chunks of 25 to avoid overly long filters
+    const BATCH_SIZE = 25;
+    for (let i = 0; i < participantIds.length; i += BATCH_SIZE) {
+      const batch = participantIds.slice(i, i + BATCH_SIZE);
+      try {
+        const filter = batch.map((id) => `Participant_Record=${id}`).join(' OR ');
+        // MP renames dp_fileUniqueId to Column_N in the response
+        const contacts = await tableService.getTableRecords<Record<string, unknown>>('Contacts', {
+          $select: 'Participant_Record,dp_fileUniqueId',
+          $filter: filter,
+        });
+
+        for (const c of contacts) {
+          const participantRecord = c.Participant_Record as number;
+          // Find the GUID — it's the value that's not Participant_Record
+          const guid = Object.entries(c).find(
+            ([key, val]) =>
+              key !== 'Participant_Record' && typeof val === 'string' && val.length > 0
+          )?.[1] as string | undefined;
+
+          if (guid && participantRecord) {
+            imageMap.set(participantRecord, `${fileBaseUrl}/${guid}?$thumbnail=true`);
+          }
+        }
+      } catch (err) {
+        console.error('[RoomManager] Error fetching contact images (batch):', err);
+        break; // Don't keep trying if MP is rejecting the query
+      }
+    }
+  }
+
+  // Attach image URLs to participants
+  const participantsWithImages = participants.map((p) => ({
+    ...p,
+    Image_URL: imageMap.get(p.Participant_ID) ?? null,
+  }));
+
   return {
     event: events.length > 0 ? events[0] : null,
     rooms,
@@ -38,7 +82,7 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
       Closed: !!er.Closed,
       Auto_Close_At_Capacity: !!er.Auto_Close_At_Capacity,
     })),
-    participants,
+    participants: participantsWithImages,
     groups,
   };
 }

@@ -5,9 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   Calendar,
   Search,
-  ClipboardList,
-  Ticket,
-  XCircle,
   Hash,
   DoorOpen,
   Plus,
@@ -31,41 +28,6 @@ import { getPinnedEventsForLevel } from '@/lib/mockData';
 
 // Apps within the Events category
 const EVENTS_APPS = [
-  {
-    id: 'calendar',
-    name: 'Calendar',
-    description: 'View and manage all events',
-    icon: Calendar,
-    route: '/events/calendar',
-  },
-  {
-    id: 'finder',
-    name: 'Finder',
-    description: 'Search for specific events',
-    icon: Search,
-    route: '/events/finder',
-  },
-  {
-    id: 'registration',
-    name: 'Registration',
-    description: 'Manage event signups',
-    icon: ClipboardList,
-    route: '/events/registration',
-  },
-  {
-    id: 'ticketed',
-    name: 'Ticketed',
-    description: 'Paid events and tickets',
-    icon: Ticket,
-    route: '/events/ticketed',
-  },
-  {
-    id: 'cancellations',
-    name: 'Cancellations',
-    description: 'Handle event cancellations',
-    icon: XCircle,
-    route: '/events/cancellations',
-  },
   {
     id: 'counter',
     name: 'Counter',
@@ -223,15 +185,8 @@ export default function EventsCategoryPage() {
         ? UPCOMING_EVENTS.slice(0, 4)
         : UPCOMING_EVENTS;
 
-  // Filter apps based on access level
-  const filteredApps =
-    accessLevel === 'low'
-      ? EVENTS_APPS.filter((a) => ['calendar', 'finder'].includes(a.id))
-      : accessLevel === 'medium'
-        ? EVENTS_APPS.filter((a) =>
-            ['calendar', 'finder', 'registration', 'counter'].includes(a.id)
-          )
-        : EVENTS_APPS;
+  // All event apps are visible regardless of access level
+  const filteredApps = EVENTS_APPS;
 
   // Check if current page is pinned (the Events category page itself)
   const isCurrentPagePinned = pinnedItems.some((item) => item.route === '/events');

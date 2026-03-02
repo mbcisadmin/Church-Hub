@@ -80,6 +80,29 @@ export async function getEvents(
 }
 
 /**
+ * Get events that have at least one Event_Room, queried from Event_Rooms table.
+ * Uses Event_ID_Table traversal to get event fields.
+ */
+export async function getEventsWithRooms(
+  eventDate: string,
+  congregationId: number | null
+): Promise<Event[]> {
+  let filter = `CAST(Event_ID_Table.Event_Start_Date AS DATE) = '${eventDate}'`;
+
+  if (congregationId) {
+    filter += ` AND Event_ID_Table.Congregation_ID = ${congregationId}`;
+  }
+
+  return tableService.getTableRecords<Event>('Event_Rooms', {
+    $filter: filter,
+    $select:
+      'Event_ID_Table.Event_ID, Event_ID_Table.Event_Title, Event_ID_Table.Event_Start_Date, Event_ID_Table.Event_End_Date, Event_ID_Table.Congregation_ID, Event_ID_Table.Event_Type_ID, Event_ID_Table.Program_ID, Event_ID_Table_Event_Type_ID_Table.Event_Type',
+    $orderby: 'Event_ID_Table.Event_Start_Date',
+    $distinct: true,
+  });
+}
+
+/**
  * Get all available metrics
  */
 export async function getMetrics(): Promise<Metric[]> {

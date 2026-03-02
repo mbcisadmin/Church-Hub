@@ -6,16 +6,19 @@ export interface RoomManagerEvent {
   Event_ID: number;
   Event_Title: string;
   Event_Start_Date: string;
-  Event_End_Date: string;
-  Congregation_ID: number;
+  Congregation_Name: string;
+  Still_Checked_In: number;
+  Participants_In: number;
+  Volunteers_In: number;
 }
 
 export interface Room {
-  Room_ID: number;
+  Room_ID: number | null;
   Room_Name: string;
   Maximum_Capacity: number | null;
   Building_ID: number | null;
   Building_Name: string | null;
+  Still_Checked_In: number | null;
 }
 
 export interface EventRoom {
@@ -38,12 +41,19 @@ export interface EventParticipant {
   Event_ID: number;
   Participant_ID: number;
   Display_Name: string;
+  Nickname: string | null;
+  First_Name: string;
+  Last_Name: string;
   Room_ID: number | null;
   Room_Name: string | null;
   Participant_Type_ID: number;
-  Time_In: string | null;
+  Role_Title: string | null;
+  Age: number | null;
+  Time_in: string | null;
   Time_Out: string | null;
   Group_Role_ID: number | null;
+  Is_New: boolean | null;
+  Image_URL: string | null;
   _loading?: boolean;
 }
 
@@ -69,4 +79,5 @@ export type RoomManagerAction =
   | { type: 'setBalancePriority'; eventRoomId: number; priority: number | null }
   | { type: 'checkOut'; eventParticipantId: number }
   | { type: 'checkIn'; eventParticipantId: number }
-  | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number };
+  | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number }
+  | { type: 'closeRoom'; roomId: number };

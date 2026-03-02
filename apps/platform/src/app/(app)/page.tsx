@@ -7,18 +7,12 @@ import {
   Lock,
   LogIn,
   Users,
-  Calendar,
-  HandHeart,
   UsersRound,
-  BarChart3,
-  Church,
-  Wallet,
   Home,
   CalendarDays,
   Pin,
   Handshake,
   User,
-  Building2,
   CheckSquare,
   AlertCircle,
   History,
@@ -51,13 +45,10 @@ import {
 
 // Map categories to their icons (matching nav)
 const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  Finance: Wallet,
-  Prayer: HandHeart,
   Events: CalendarDays,
   Profile: User,
   Groups: UsersRound,
   People: Users,
-  Facilities: Building2,
   Serving: Handshake,
   'Group Meeting': UsersRound,
   Event: CalendarDays,
@@ -180,26 +171,17 @@ const MOCK_UPCOMING = [
 ];
 
 const MOCK_NEEDS_ATTENTION = [
+  { id: 1, title: 'Registration closing', category: 'Events', route: '/events', priority: 'high' },
+  { id: 2, title: 'Update profile', category: 'Profile', route: '/me', priority: 'low' },
+  { id: 3, title: 'Review roster', category: 'Groups', route: '/groups', priority: 'medium' },
   {
-    id: 1,
-    title: '3 budget requests',
-    category: 'Finance',
-    route: '/finance/budget-requests',
-    priority: 'high',
-  },
-  { id: 2, title: '5 prayer requests', category: 'Prayer', route: '/prayer', priority: 'medium' },
-  { id: 3, title: 'Registration closing', category: 'Events', route: '/events', priority: 'high' },
-  { id: 4, title: 'Update profile', category: 'Profile', route: '/me', priority: 'low' },
-  { id: 5, title: 'Review roster', category: 'Groups', route: '/groups', priority: 'medium' },
-  { id: 6, title: 'Approve expense', category: 'Finance', route: '/finance', priority: 'high' },
-  {
-    id: 7,
+    id: 4,
     title: 'New member follow-up',
     category: 'People',
     route: '/people',
     priority: 'medium',
   },
-  { id: 8, title: 'Room conflict', category: 'Facilities', route: '/facilities', priority: 'low' },
+  { id: 5, title: 'Giving report due', category: 'Events', route: '/giving', priority: 'high' },
 ];
 
 // Mock data for recently visited items
@@ -244,12 +226,12 @@ const MOCK_RECENT: Array<{
   },
   {
     id: 'recent-4',
-    type: 'dashboard',
-    title: 'Giving',
-    category: 'Finance',
-    stat: '$182k',
-    statLabel: 'MTD',
-    route: '/analytics/dashboards/giving',
+    type: 'group',
+    title: 'Marriage Builders',
+    subtitle: 'Co-Leader',
+    stat: '8',
+    statLabel: 'members',
+    route: '/groups/2',
   },
 ];
 
