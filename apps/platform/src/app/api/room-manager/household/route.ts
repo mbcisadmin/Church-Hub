@@ -31,18 +31,20 @@ export async function GET(request: NextRequest) {
       $top: 1,
     });
 
-    if (contacts.length === 0 || !contacts[0].Household_ID) {
-      return NextResponse.json(null);
+    const contactId = contacts[0].Contact_ID;
+
+    if (!contacts[0].Household_ID) {
+      return NextResponse.json({ contactId, household: null });
     }
 
-    const result = await getHouseholdWithMembers(contacts[0].Household_ID, contacts[0].Contact_ID);
+    const result = await getHouseholdWithMembers(contacts[0].Household_ID, contactId);
     if (result) {
       // Filter out deceased members (Date_of_Death set) and position ID 7
       result.Members = result.Members.filter(
         (m) => !m.Date_of_Death && m.Household_Position_ID !== 7
       );
     }
-    return NextResponse.json(result);
+    return NextResponse.json({ contactId, household: result });
   } catch (error) {
     console.error('Error fetching household data:', error);
     return NextResponse.json({ error: 'Failed to fetch household data' }, { status: 500 });

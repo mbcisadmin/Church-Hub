@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Clock, CheckCircle2, Users, ArrowRightLeft, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import {
+  User,
+  Clock,
+  CheckCircle2,
+  Users,
+  ArrowRightLeft,
+  LogOut,
+  ChevronRight,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { ResponsiveSheet, SheetPage } from '@church/nextjs-ui/components/ResponsiveSheet';
 import type { EventParticipant, Room } from '@/types/roomManager';
@@ -137,9 +146,13 @@ function MemberAvatar({ member, size = 'sm' }: { member: HouseholdMember; size?:
 function PersonDetailHeader({
   person,
   roomName,
+  contactId,
+  onNavigate,
 }: {
   person: EventParticipant;
   roomName: string | null;
+  contactId: number | null;
+  onNavigate: (path: string) => void;
 }) {
   const firstName = person.Nickname || person.First_Name || '';
   const name = `${firstName} ${person.Last_Name ?? ''}`.trim();
@@ -157,8 +170,12 @@ function PersonDetailHeader({
         <User className="h-28 w-28 text-white opacity-10 md:h-40 md:w-40" />
       </div>
 
-      {/* Person info */}
-      <div className="relative z-10 flex items-center gap-4">
+      {/* Person info — clickable to people search */}
+      <button
+        className="relative z-10 flex w-full items-center gap-4 text-left"
+        onClick={() => contactId && onNavigate(`/people/search?contactId=${contactId}`)}
+        disabled={!contactId}
+      >
         <PersonAvatar imageUrl={person.Image_URL} initials={initials} size="lg" />
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-xl font-bold tracking-wide text-white md:text-2xl">
@@ -167,7 +184,8 @@ function PersonDetailHeader({
           {person.Age != null && <p className="mt-0.5 text-sm text-white/70">Age {person.Age}</p>}
           {roomName && <p className="mt-0.5 text-sm text-white/70">{roomName}</p>}
         </div>
-      </div>
+        {contactId && <ChevronRight className="h-5 w-5 shrink-0 text-white/50" />}
+      </button>
     </div>
   );
 }
@@ -277,6 +295,7 @@ export default function PersonDetailSheet({
   onChangeRoom,
 }: PersonDetailSheetProps) {
   const [household, setHousehold] = useState<HouseholdWithMembersResponse | null>(null);
+  const [contactId, setContactId] = useState<number | null>(null);
   const [householdLoading, setHouseholdLoading] = useState(false);
   const [showRoomPicker, setShowRoomPicker] = useState(false);
 
@@ -284,17 +303,20 @@ export default function PersonDetailSheet({
   useEffect(() => {
     if (!open || !person) {
       setHousehold(null);
+      setContactId(null);
       return;
     }
 
     setHouseholdLoading(true);
     setHousehold(null);
+    setContactId(null);
     setShowRoomPicker(false);
 
     fetch(`/api/room-manager/household?participantId=${person.Participant_ID}`)
       .then((res) => res.json())
       .then((data) => {
-        setHousehold(data);
+        setContactId(data?.contactId ?? null);
+        setHousehold(data?.household ?? null);
       })
       .catch(() => {
         // Silently fail — household is supplemental info
@@ -303,6 +325,8 @@ export default function PersonDetailSheet({
         setHouseholdLoading(false);
       });
   }, [open, person?.Participant_ID]);
+
+  const router = useRouter();
 
   if (!person) return null;
 
@@ -322,7 +346,17 @@ export default function PersonDetailSheet({
       panelClassName="bg-card overflow-hidden"
       maxWidth="max-w-2xl"
       noPanelPadding
-      header={<PersonDetailHeader person={person} roomName={roomName} />}
+      header={
+        <PersonDetailHeader
+          person={person}
+          roomName={roomName}
+          contactId={contactId}
+          onNavigate={(path) => {
+            onClose();
+            router.push(path);
+          }}
+        />
+      }
     >
       <SheetPage name="main">
         {/* Session Info */}
