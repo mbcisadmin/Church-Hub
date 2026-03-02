@@ -388,13 +388,7 @@ export default function RoomManagerPage() {
                         </label>
                         <button
                           onClick={() => setShowAll(!showAll)}
-                          className="relative flex h-10 w-[4.75rem] cursor-pointer items-center rounded-full border border-black/[0.06] p-1"
-                          style={{
-                            background:
-                              'linear-gradient(145deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.07) 100%)',
-                            boxShadow:
-                              '0 2px 8px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)',
-                          }}
+                          className="border-input bg-background relative flex h-10 w-[4.75rem] cursor-pointer items-center rounded-full border p-1"
                           aria-label={`Showing ${showAll ? 'all' : 'checked in'} people, click to toggle`}
                         >
                           <div

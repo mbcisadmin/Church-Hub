@@ -32,7 +32,7 @@ function RoomDetailHeader({
   activePage: PageName;
   onNavigate: (page: PageName) => void;
 }) {
-  const checkedIn = participants.filter((p) => p.Time_In && !p.Time_Out).length;
+  const checkedIn = participants.filter((p) => p.Time_in && !p.Time_Out).length;
 
   const subtitle = [
     room.Building_Name,

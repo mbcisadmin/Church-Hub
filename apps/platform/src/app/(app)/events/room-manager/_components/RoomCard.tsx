@@ -21,7 +21,7 @@ export default function RoomCard({
   onClick,
   onCloseAll,
 }: RoomCardProps) {
-  const checkedIn = participants.filter((p) => p.Time_In && !p.Time_Out).length;
+  const checkedIn = participants.filter((p) => p.Time_in && !p.Time_Out).length;
   const maxCapacity = room.Maximum_Capacity;
   const percentage = maxCapacity ? Math.min((checkedIn / maxCapacity) * 100, 100) : 0;
 
@@ -29,7 +29,7 @@ export default function RoomCard({
   const closedGroups = eventRooms.filter((er) => er.Closed).length;
 
   const volunteers = participants.filter(
-    (p) => p.Time_In && !p.Time_Out && p.Group_Role_ID !== null
+    (p) => p.Time_in && !p.Time_Out && p.Group_Role_ID !== null
   ).length;
   const attendees = checkedIn - volunteers;
 
@@ -42,9 +42,16 @@ export default function RoomCard({
   const isAnyLoading = eventRooms.some((er) => er._loading);
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       className={`bg-card cursor-pointer border text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${
         highlighted ? 'border-primary ring-primary/20 ring-2' : 'border-border'
       }`}
@@ -115,6 +122,6 @@ export default function RoomCard({
           </Button>
         </div>
       )}
-    </button>
+    </div>
   );
 }

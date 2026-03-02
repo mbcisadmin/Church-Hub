@@ -72,6 +72,7 @@ const PRIMARY_SECTIONS = [
       { label: 'Cancellations', route: '/events/cancellations' },
       { label: 'Counter', route: '/events/counter' },
       { label: 'Finder', route: '/events/finder' },
+      { label: 'Room Manager', route: '/events/room-manager' },
       { label: 'Registration', route: '/events/registration' },
       { label: 'Ticketed', route: '/events/ticketed' },
     ],
@@ -153,7 +154,6 @@ const DYNAMIC_SECTIONS = [
     items: [
       { label: 'Campus Map', route: '/facilities/map' },
       { label: 'Equipment', route: '/facilities/equipment' },
-      { label: 'Room Manager', route: '/facilities/room-manager' },
       { label: 'Room Reservations', route: '/facilities/rooms' },
     ],
     addAction: { label: 'Reserve', route: '/facilities/reserve' },

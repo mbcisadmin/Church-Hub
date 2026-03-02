@@ -9,6 +9,7 @@ import {
   Ticket,
   XCircle,
   Hash,
+  DoorOpen,
   Plus,
   Pin,
   CalendarDays,
@@ -71,6 +72,13 @@ const EVENTS_APPS = [
     description: 'Track attendance counts',
     icon: Hash,
     route: '/events/counter',
+  },
+  {
+    id: 'room-manager',
+    name: 'Room Manager',
+    description: 'Manage event room assignments and check-ins',
+    icon: DoorOpen,
+    route: '/events/room-manager',
   },
 ];
 

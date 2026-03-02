@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { Loader2, Users, UserCheck, User } from 'lucide-react';
 import { DateSwiper } from '@church/nextjs-ui/date-swiper';
@@ -12,6 +12,7 @@ type Event = {
   Event_Title: string;
   Event_Start_Date: string;
   Event_End_Date: string;
+  Event_Type?: string;
 };
 
 interface RoomManagerHeaderProps {
@@ -43,7 +44,7 @@ export default function RoomManagerHeader({
     async function loadEvents() {
       setIsLoadingEvents(true);
       try {
-        let url = `/api/counter/events?date=${selectedDate}`;
+        let url = `/api/counter/events?date=${selectedDate}&requireRooms=true`;
         if (selectedCampus) {
           url += `&congregationId=${selectedCampus.Congregation_ID}`;
         }
@@ -67,12 +68,21 @@ export default function RoomManagerHeader({
     loadEvents();
   }, [selectedDate, selectedCampus?.Congregation_ID]);
 
-  // Compute stats from data
-  const totalAttending = data?.participants.filter((p) => p.Time_In && !p.Time_Out).length ?? 0;
-  const totalVolunteers =
-    data?.participants.filter((p) => p.Time_In && !p.Time_Out && p.Group_Role_ID !== null).length ??
-    0;
-  const totalParticipants = totalAttending - totalVolunteers;
+  // Group events by Event_Type for the dropdown
+  const eventsByType = useMemo(() => {
+    const groups = new Map<string, Event[]>();
+    for (const event of events) {
+      const type = event.Event_Type || 'Other';
+      if (!groups.has(type)) groups.set(type, []);
+      groups.get(type)!.push(event);
+    }
+    return groups;
+  }, [events]);
+
+  // Use pre-computed stats from the SP event dataset
+  const totalAttending = data?.event?.Still_Checked_In ?? 0;
+  const totalVolunteers = data?.event?.Volunteers_In ?? 0;
+  const totalParticipants = data?.event?.Participants_In ?? 0;
 
   return (
     <div className="space-y-4">
@@ -107,10 +117,14 @@ export default function RoomManagerHeader({
             className="border-input bg-background text-foreground h-10 w-full border px-3 text-sm focus:ring-2 focus:outline-none"
           >
             <option value="">Select an event</option>
-            {events.map((event) => (
-              <option key={event.Event_ID} value={event.Event_ID}>
-                {event.Event_Title} — {format(new Date(event.Event_Start_Date), 'h:mm a')}
-              </option>
+            {[...eventsByType.entries()].map(([type, typeEvents]) => (
+              <optgroup key={type} label={type}>
+                {typeEvents.map((event) => (
+                  <option key={event.Event_ID} value={event.Event_ID}>
+                    {event.Event_Title} — {format(new Date(event.Event_Start_Date), 'h:mm a')}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         )}
