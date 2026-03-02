@@ -1,6 +1,6 @@
 'use client';
 
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { Loader2, LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { Room, EventParticipant, RoomManagerAction } from '@/types/roomManager';
@@ -24,7 +24,7 @@ export default function PeoplePanel({ participants, rooms, roomName, onAction }:
   return (
     <div className="divide-border divide-y">
       {participants.map((p) => {
-        const isCheckedIn = p.Time_In && !p.Time_Out;
+        const isCheckedIn = p.Time_in && !p.Time_Out;
 
         return (
           <div key={p.Event_Participant_ID} className="flex items-center gap-3 p-3">
@@ -32,13 +32,17 @@ export default function PeoplePanel({ participants, rooms, roomName, onAction }:
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-foreground truncate text-sm font-medium">
-                  {p.Display_Name}
+                  {p.Nickname || p.First_Name} {p.Last_Name}
                 </span>
                 {p._loading && <Loader2 className="text-primary h-3 w-3 shrink-0 animate-spin" />}
               </div>
               <div className="text-muted-foreground flex items-center gap-2 text-xs">
-                {p.Time_In && <span>In: {format(parseISO(p.Time_In), 'h:mm a')}</span>}
-                {p.Time_Out && <span>Out: {format(parseISO(p.Time_Out), 'h:mm a')}</span>}
+                {p.Time_in && (
+                  <span>In: {format(new Date(p.Time_in.replace(/Z$/i, '')), 'h:mm a')}</span>
+                )}
+                {p.Time_Out && (
+                  <span>Out: {format(new Date(p.Time_Out.replace(/Z$/i, '')), 'h:mm a')}</span>
+                )}
               </div>
             </div>
 
@@ -58,7 +62,7 @@ export default function PeoplePanel({ participants, rooms, roomName, onAction }:
               className="border-input bg-background text-foreground h-7 max-w-[120px] border px-1 text-xs focus:ring-2 focus:outline-none"
             >
               {rooms.map((r) => (
-                <option key={r.Room_ID} value={r.Room_ID}>
+                <option key={r.Room_ID} value={r.Room_ID ?? ''}>
                   {r.Room_Name}
                 </option>
               ))}

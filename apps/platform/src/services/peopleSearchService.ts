@@ -11,6 +11,7 @@ export type Contact = {
   Mobile_Phone: string | null;
   Company_Phone: string | null;
   Date_of_Birth: string | null;
+  Date_of_Death?: string | null;
   Gender_ID: number | null;
   Marital_Status_ID: number | null;
   Household_ID: number | null;
@@ -143,8 +144,10 @@ export async function getHouseholdWithMembers(
     Mobile_Phone: string | null;
     Company_Phone: string | null;
     Date_of_Birth: string | null;
+    Date_of_Death: string | null;
     Gender_ID: number | null;
     Household_Position_ID: number | null;
+    Participant_Record: number | null;
     __Age: number | null;
     Contact_Status_ID: number | null;
     Image_GUID: string | null;
@@ -189,7 +192,7 @@ export async function getHouseholdWithMembers(
   const members = await tableService.getTableRecords<MemberRecord>('Contacts', {
     $filter: `Household_ID = ${householdId}`,
     $select:
-      'Contact_ID,First_Name,Last_Name,Nickname,Display_Name,Email_Address,Mobile_Phone,Company_Phone,Date_of_Birth,Contacts.Gender_ID,Contacts.Household_Position_ID,__Age,Contact_Status_ID,dp_fileUniqueId AS Image_GUID,Household_Position_ID_Table.Household_Position AS Household_Position,Gender_ID_Table.Gender AS Gender',
+      'Contact_ID,First_Name,Last_Name,Nickname,Display_Name,Email_Address,Mobile_Phone,Company_Phone,Date_of_Birth,Date_of_Death,Contacts.Gender_ID,Contacts.Household_Position_ID,Participant_Record,__Age,Contact_Status_ID,dp_fileUniqueId AS Image_GUID,Household_Position_ID_Table.Household_Position AS Household_Position,Gender_ID_Table.Gender AS Gender',
     $orderby: 'Contacts.Household_Position_ID,Last_Name,First_Name',
   });
 
@@ -204,11 +207,12 @@ export async function getHouseholdWithMembers(
     Mobile_Phone: m.Mobile_Phone,
     Company_Phone: m.Company_Phone,
     Date_of_Birth: m.Date_of_Birth,
+    Date_of_Death: m.Date_of_Death,
     Gender_ID: m.Gender_ID,
     Marital_Status_ID: null,
     Household_ID: householdId,
     Household_Position_ID: m.Household_Position_ID,
-    Participant_Record: null,
+    Participant_Record: m.Participant_Record,
     Company: null,
     Company_Name: null,
     __Age: m.__Age,

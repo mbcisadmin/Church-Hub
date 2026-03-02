@@ -4,6 +4,13 @@ import type { RoomManagerData, RoomManagerAction } from '@/types/roomManager';
 
 const POLL_INTERVAL = 5000;
 
+/** Produce a local ISO-ish string matching MP's datetime format (no Z suffix) */
+function localISOString(): string {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
 export function useRoomManagerData(eventId: number | null) {
   const [data, setData] = useState<RoomManagerData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -145,7 +152,7 @@ export function useRoomManagerData(eventId: number | null) {
                   ...prev,
                   participants: prev.participants.map((p) =>
                     p.Event_Participant_ID === action.eventParticipantId
-                      ? { ...p, Time_Out: new Date().toISOString(), _loading: true }
+                      ? { ...p, Time_Out: localISOString(), Time_in: p.Time_in, _loading: true }
                       : p
                   ),
                 }
@@ -160,7 +167,7 @@ export function useRoomManagerData(eventId: number | null) {
                   ...prev,
                   participants: prev.participants.map((p) =>
                     p.Event_Participant_ID === action.eventParticipantId
-                      ? { ...p, Time_In: new Date().toISOString(), Time_Out: null, _loading: true }
+                      ? { ...p, Time_in: localISOString(), Time_Out: null, _loading: true }
                       : p
                   ),
                 }
@@ -183,6 +190,20 @@ export function useRoomManagerData(eventId: number | null) {
                           _loading: true,
                         }
                       : p
+                  ),
+                }
+              : prev
+          );
+          break;
+        }
+        case 'closeRoom': {
+          // Optimistic: mark all event rooms for this room as closed
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  eventRooms: prev.eventRooms.map((er) =>
+                    er.Room_ID === action.roomId ? { ...er, Closed: true, _loading: true } : er
                   ),
                 }
               : prev
@@ -237,5 +258,7 @@ function getActionSuccessMessage(action: RoomManagerAction): string {
       return 'Checked in';
     case 'changeRoom':
       return 'Room changed';
+    case 'closeRoom':
+      return 'Room closed';
   }
 }
