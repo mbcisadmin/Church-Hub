@@ -87,27 +87,22 @@ function parseMpDate(dateStr: string): Date {
 
 function PersonCard({
   person,
-  rooms,
   onCheckOut,
   onCheckIn,
-  onChangeRoom,
+  onMoveRoom,
   onPersonClick,
 }: {
   person: EventParticipant;
-  rooms: Room[];
   onCheckOut: (p: EventParticipant) => void;
   onCheckIn: (p: EventParticipant) => void;
-  onChangeRoom: (p: EventParticipant, roomId: number) => void;
+  onMoveRoom: (p: EventParticipant) => void;
   onPersonClick: (p: EventParticipant) => void;
 }) {
-  const [showRoomPicker, setShowRoomPicker] = useState(false);
   const timeIn = person.Time_in ? parseMpDate(person.Time_in) : null;
   const formattedTime = timeIn ? format(timeIn, 'h:mm a') : '';
   const isCheckedOut = !!person.Time_Out;
   const timeOut = person.Time_Out ? parseMpDate(person.Time_Out) : null;
   const formattedTimeOut = timeOut ? format(timeOut, 'h:mm a') : '';
-
-  const availableRooms = rooms.filter((r) => r.Room_ID !== null && r.Room_ID !== person.Room_ID);
 
   return (
     <div
@@ -163,7 +158,7 @@ function PersonCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setShowRoomPicker(!showRoomPicker);
+              onMoveRoom(person);
             }}
             className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
           >
@@ -195,32 +190,6 @@ function PersonCard({
           </button>
         )}
       </div>
-
-      {/* Room picker dropdown */}
-      {!isCheckedOut && showRoomPicker && availableRooms.length > 0 && (
-        <div className="border-t">
-          <div className="max-h-32 overflow-y-auto">
-            {availableRooms.map((room) => (
-              <button
-                key={room.Room_ID}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onChangeRoom(person, room.Room_ID!);
-                  setShowRoomPicker(false);
-                }}
-                className="hover:bg-muted flex w-full items-center justify-between px-3 py-2 text-left text-xs transition-colors"
-              >
-                <span className="text-foreground truncate font-medium">{room.Room_Name}</span>
-                {room.Maximum_Capacity != null && (
-                  <span className="text-muted-foreground ml-2 shrink-0">
-                    {room.Still_Checked_In ?? 0}/{room.Maximum_Capacity}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -244,9 +213,17 @@ export default function RoomManagerPage() {
   // Person detail sheet state
   const [selectedPerson, setSelectedPerson] = useState<EventParticipant | null>(null);
   const [personSheetOpen, setPersonSheetOpen] = useState(false);
+  const [sheetDefaultPage, setSheetDefaultPage] = useState('main');
 
   const handlePersonClick = (person: EventParticipant) => {
     setSelectedPerson(person);
+    setSheetDefaultPage('main');
+    setPersonSheetOpen(true);
+  };
+
+  const handleMoveRoom = (person: EventParticipant) => {
+    setSelectedPerson(person);
+    setSheetDefaultPage('move-room');
     setPersonSheetOpen(true);
   };
 
@@ -265,9 +242,13 @@ export default function RoomManagerPage() {
     executeAction({ type: 'checkIn', eventParticipantId: person.Event_Participant_ID });
   };
 
-  const handleChangeRoom = (person: EventParticipant, roomId: number) => {
-    const targetRoom = data?.rooms.find((r) => r.Room_ID === roomId);
-    toast.success(`${personName(person)} moved to ${targetRoom?.Room_Name ?? 'new room'}`);
+  const handleChangeRoom = (person: EventParticipant, roomId: number | null) => {
+    if (roomId === null) {
+      toast.success(`${personName(person)} unassigned from room`);
+    } else {
+      const targetRoom = data?.rooms.find((r) => r.Room_ID === roomId);
+      toast.success(`${personName(person)} moved to ${targetRoom?.Room_Name ?? 'new room'}`);
+    }
     executeAction({
       type: 'changeRoom',
       eventParticipantId: person.Event_Participant_ID,
@@ -466,10 +447,9 @@ export default function RoomManagerPage() {
                                   <PersonCard
                                     key={person.Event_Participant_ID}
                                     person={person}
-                                    rooms={data.rooms}
                                     onCheckOut={handleCheckOut}
                                     onCheckIn={handleCheckIn}
-                                    onChangeRoom={handleChangeRoom}
+                                    onMoveRoom={handleMoveRoom}
                                     onPersonClick={handlePersonClick}
                                   />
                                 ))}
@@ -505,6 +485,7 @@ export default function RoomManagerPage() {
         onCheckOut={handleCheckOut}
         onCheckIn={handleCheckIn}
         onChangeRoom={handleChangeRoom}
+        defaultPage={sheetDefaultPage}
       />
     </div>
   );

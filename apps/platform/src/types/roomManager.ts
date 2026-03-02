@@ -79,5 +79,5 @@ export type RoomManagerAction =
   | { type: 'setBalancePriority'; eventRoomId: number; priority: number | null }
   | { type: 'checkOut'; eventParticipantId: number }
   | { type: 'checkIn'; eventParticipantId: number }
-  | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number }
+  | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number | null }
   | { type: 'closeRoom'; roomId: number };

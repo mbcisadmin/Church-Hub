@@ -255,13 +255,13 @@ export function ResponsiveSheet({
   // Reset navigation when sheet opens or closes
   useEffect(() => {
     if (open) {
-      // When opening, sync to the current defaultPage
+      // When opening on a non-main page, seed history so back goes to main
       setCurrentPage(defaultPage);
-      setHistory([defaultPage]);
+      setHistory(defaultPage !== 'main' ? ['main', defaultPage] : [defaultPage]);
     } else {
       // When closing, also reset (for cleanup)
-      setCurrentPage(defaultPage);
-      setHistory([defaultPage]);
+      setCurrentPage('main');
+      setHistory(['main']);
     }
   }, [open, defaultPage]);
 

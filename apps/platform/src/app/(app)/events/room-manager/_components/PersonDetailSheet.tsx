@@ -12,7 +12,11 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { ResponsiveSheet, SheetPage } from '@church/nextjs-ui/components/ResponsiveSheet';
+import {
+  ResponsiveSheet,
+  SheetPage,
+  useResponsiveSheet,
+} from '@church/nextjs-ui/components/ResponsiveSheet';
 import type { EventParticipant, Room } from '@/types/roomManager';
 
 /** MP returns datetimes as local server time with a Z suffix — strip it so JS treats as local */
@@ -35,7 +39,9 @@ interface PersonDetailSheetProps {
   rooms: Room[];
   onCheckOut: (p: EventParticipant) => void;
   onCheckIn: (p: EventParticipant) => void;
-  onChangeRoom: (p: EventParticipant, roomId: number) => void;
+  onChangeRoom: (p: EventParticipant, roomId: number | null) => void;
+  /** Which page to open on — 'main' or 'move-room' */
+  defaultPage?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -293,11 +299,11 @@ export default function PersonDetailSheet({
   onCheckOut,
   onCheckIn,
   onChangeRoom,
+  defaultPage = 'main',
 }: PersonDetailSheetProps) {
   const [household, setHousehold] = useState<HouseholdWithMembersResponse | null>(null);
   const [contactId, setContactId] = useState<number | null>(null);
   const [householdLoading, setHouseholdLoading] = useState(false);
-  const [showRoomPicker, setShowRoomPicker] = useState(false);
 
   // Fetch household on open
   useEffect(() => {
@@ -310,7 +316,6 @@ export default function PersonDetailSheet({
     setHouseholdLoading(true);
     setHousehold(null);
     setContactId(null);
-    setShowRoomPicker(false);
 
     fetch(`/api/room-manager/household?participantId=${person.Participant_ID}`)
       .then((res) => res.json())
@@ -346,6 +351,7 @@ export default function PersonDetailSheet({
       panelClassName="bg-card overflow-hidden"
       maxWidth="max-w-2xl"
       noPanelPadding
+      defaultPage={defaultPage}
       header={
         <PersonDetailHeader
           person={person}
@@ -392,15 +398,7 @@ export default function PersonDetailSheet({
 
         {/* Actions — always visible */}
         <div className="border-t">
-          {!isCheckedOut && (
-            <button
-              onClick={() => setShowRoomPicker(!showRoomPicker)}
-              className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors"
-            >
-              <ArrowRightLeft className="h-3.5 w-3.5" />
-              Move Room
-            </button>
-          )}
+          {!isCheckedOut && <MoveRoomButton />}
           {isCheckedOut ? (
             <button
               onClick={() => {
@@ -424,32 +422,69 @@ export default function PersonDetailSheet({
               Check Out
             </button>
           )}
-          {showRoomPicker && availableRooms.length > 0 && (
-            <div className="border-t">
-              <div className="max-h-40 overflow-y-auto">
-                {availableRooms.map((room) => (
-                  <button
-                    key={room.Room_ID}
-                    onClick={() => {
-                      onChangeRoom(person, room.Room_ID!);
-                      setShowRoomPicker(false);
-                      onClose();
-                    }}
-                    className="hover:bg-muted flex w-full items-center justify-between px-4 py-2.5 text-left text-sm transition-colors md:px-6"
-                  >
-                    <span className="text-foreground truncate font-medium">{room.Room_Name}</span>
-                    {room.Maximum_Capacity != null && (
-                      <span className="text-muted-foreground ml-2 shrink-0 text-xs">
-                        {room.Still_Checked_In ?? 0}/{room.Maximum_Capacity}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </SheetPage>
+
+      <SheetPage name="move-room" title="Move Room">
+        <div className="px-4 py-3 md:px-6">
+          <p className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
+            Move to
+          </p>
+        </div>
+        {availableRooms.length > 0 ? (
+          <div className="divide-y">
+            {availableRooms.map((room) => (
+              <button
+                key={room.Room_ID}
+                onClick={() => {
+                  onChangeRoom(person, room.Room_ID!);
+                  onClose();
+                }}
+                className="hover:bg-muted flex w-full items-center justify-between px-4 py-3 text-left transition-colors md:px-6"
+              >
+                <span className="text-foreground truncate text-sm font-medium">
+                  {room.Room_Name}
+                </span>
+                {room.Maximum_Capacity != null && (
+                  <span className="text-muted-foreground ml-2 shrink-0 text-xs">
+                    {room.Still_Checked_In ?? 0}/{room.Maximum_Capacity}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground px-4 py-6 text-center text-sm md:px-6">
+            No other rooms available for this event
+          </p>
+        )}
+        {person.Room_ID != null && (
+          <button
+            onClick={() => {
+              onChangeRoom(person, null);
+              onClose();
+            }}
+            className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Unassign Room
+          </button>
+        )}
+      </SheetPage>
     </ResponsiveSheet>
+  );
+}
+
+/** Navigate to the move-room page from within the sheet */
+function MoveRoomButton() {
+  const { navigate } = useResponsiveSheet();
+  return (
+    <button
+      onClick={() => navigate('move-room')}
+      className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors"
+    >
+      <ArrowRightLeft className="h-3.5 w-3.5" />
+      Move Room
+    </button>
   );
 }

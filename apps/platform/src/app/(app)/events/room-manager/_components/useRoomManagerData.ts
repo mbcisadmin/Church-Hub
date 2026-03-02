@@ -176,7 +176,10 @@ export function useRoomManagerData(eventId: number | null) {
           break;
         }
         case 'changeRoom': {
-          const targetRoom = data.rooms.find((r) => r.Room_ID === action.newRoomId);
+          const targetRoom =
+            action.newRoomId != null
+              ? data.rooms.find((r) => r.Room_ID === action.newRoomId)
+              : null;
           setData((prev) =>
             prev
               ? {
@@ -186,7 +189,7 @@ export function useRoomManagerData(eventId: number | null) {
                       ? {
                           ...p,
                           Room_ID: action.newRoomId,
-                          Room_Name: targetRoom?.Room_Name ?? p.Room_Name,
+                          Room_Name: targetRoom?.Room_Name ?? null,
                           _loading: true,
                         }
                       : p
