@@ -103,10 +103,11 @@ function PersonCard({
   const isCheckedOut = !!person.Time_Out;
   const timeOut = person.Time_Out ? parseMpDate(person.Time_Out) : null;
   const formattedTimeOut = timeOut ? format(timeOut, 'h:mm a') : '';
+  const isLoading = person._loading;
 
   return (
     <div
-      className={`flex cursor-pointer flex-col overflow-hidden rounded-lg border transition-shadow hover:shadow-md ${isCheckedOut ? 'opacity-50' : ''}`}
+      className={`flex cursor-pointer flex-col overflow-hidden rounded-lg border transition-all duration-300 hover:shadow-md ${isCheckedOut ? 'opacity-50' : ''} ${isLoading ? 'ring-primary/40 scale-[0.97] ring-2' : ''}`}
       onClick={() => onPersonClick(person)}
     >
       {/* Card header — branded with avatar, name, age */}
@@ -160,7 +161,7 @@ function PersonCard({
               e.stopPropagation();
               onMoveRoom(person);
             }}
-            className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-colors"
+            className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-2 text-xs font-medium transition-all active:scale-95"
           >
             <ArrowRightLeft className="h-3 w-3" />
             Move Room
@@ -172,7 +173,7 @@ function PersonCard({
               e.stopPropagation();
               onCheckIn(person);
             }}
-            className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs font-medium transition-colors"
+            className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs font-medium transition-all active:scale-95"
           >
             <CheckCircle2 className="h-3 w-3" />
             Check In
@@ -183,7 +184,7 @@ function PersonCard({
               e.stopPropagation();
               onCheckOut(person);
             }}
-            className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs font-medium transition-colors"
+            className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-2 text-xs font-medium transition-all active:scale-95"
           >
             <LogOut className="h-3 w-3" />
             Check Out

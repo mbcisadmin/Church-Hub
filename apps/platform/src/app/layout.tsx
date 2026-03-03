@@ -64,7 +64,7 @@ export default async function RootLayout({
           >
             <PWAProvider>
               {children}
-              <Toaster position="bottom-right" />
+              <Toaster position="top-right" />
             </PWAProvider>
           </ThemeProvider>
         </SessionProvider>

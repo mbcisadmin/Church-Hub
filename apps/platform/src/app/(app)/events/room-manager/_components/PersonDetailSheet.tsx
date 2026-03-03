@@ -405,7 +405,7 @@ export default function PersonDetailSheet({
                 onCheckIn(person);
                 onClose();
               }}
-              className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-colors"
+              className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-all active:scale-95"
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
               Check In
@@ -416,7 +416,7 @@ export default function PersonDetailSheet({
                 onCheckOut(person);
                 onClose();
               }}
-              className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-colors"
+              className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-all active:scale-95"
             >
               <LogOut className="h-3.5 w-3.5" />
               Check Out
@@ -440,7 +440,7 @@ export default function PersonDetailSheet({
                   onChangeRoom(person, room.Room_ID!);
                   onClose();
                 }}
-                className="hover:bg-muted flex w-full items-center justify-between px-4 py-3 text-left transition-colors md:px-6"
+                className="hover:bg-muted flex w-full items-center justify-between px-4 py-3 text-left transition-all active:scale-[0.98] md:px-6"
               >
                 <span className="text-foreground truncate text-sm font-medium">
                   {room.Room_Name}
@@ -464,7 +464,7 @@ export default function PersonDetailSheet({
               onChangeRoom(person, null);
               onClose();
             }}
-            className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-colors"
+            className="text-destructive hover:bg-muted flex w-full items-center justify-center gap-1.5 border-t py-3 text-sm font-medium transition-all active:scale-95"
           >
             <LogOut className="h-3.5 w-3.5" />
             Unassign Room
@@ -481,7 +481,7 @@ function MoveRoomButton() {
   return (
     <button
       onClick={() => navigate('move-room')}
-      className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-3 text-sm font-medium transition-colors"
+      className="text-primary hover:bg-muted flex w-full items-center justify-center gap-1.5 py-3 text-sm font-medium transition-all active:scale-95"
     >
       <ArrowRightLeft className="h-3.5 w-3.5" />
       Move Room

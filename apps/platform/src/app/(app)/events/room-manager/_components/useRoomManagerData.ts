@@ -227,8 +227,6 @@ export function useRoomManagerData(eventId: number | null) {
           throw new Error('Failed to execute action');
         }
 
-        toast.success(getActionSuccessMessage(action));
-
         // Re-fetch to get authoritative data
         await fetchData(eventId, true);
       } catch (err) {
@@ -241,27 +239,4 @@ export function useRoomManagerData(eventId: number | null) {
   );
 
   return { data, isLoading, error, executeAction, refetch: () => eventId && fetchData(eventId) };
-}
-
-function getActionSuccessMessage(action: RoomManagerAction): string {
-  switch (action.type) {
-    case 'closeAll':
-      return 'All groups closed';
-    case 'toggleClosed':
-      return action.closed ? 'Group closed' : 'Group opened';
-    case 'toggleAutoClose':
-      return action.autoClose ? 'Auto-close enabled' : 'Auto-close disabled';
-    case 'setCheckInCapacity':
-      return 'Check-in capacity updated';
-    case 'setBalancePriority':
-      return 'Balance priority updated';
-    case 'checkOut':
-      return 'Checked out';
-    case 'checkIn':
-      return 'Checked in';
-    case 'changeRoom':
-      return 'Room changed';
-    case 'closeRoom':
-      return 'Room closed';
-  }
 }
