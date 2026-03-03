@@ -57,11 +57,11 @@ export interface EventParticipant {
   Is_New_to_Congregation: boolean | null;
   Is_New_to_Program: boolean | null;
   Group_Role_Type_ID: number | null;
+  Contact_ID: number | null;
+  File_GUID: string | null;
   Image_URL: string | null;
   Gender: string | null;
   Group_Name: string | null;
-  Group_Role_Title: string | null;
-  Group_Role_Type: string | null;
   _loading?: boolean;
 }
 

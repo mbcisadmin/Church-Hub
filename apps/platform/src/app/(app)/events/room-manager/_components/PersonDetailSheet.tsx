@@ -82,6 +82,8 @@ interface PersonDetailSheetProps {
   onChangeRoom: (p: EventParticipant, roomId: number | null) => void;
   /** Which page to open on — 'main' or 'move-room' */
   defaultPage?: string;
+  /** Called before navigating away (e.g., to save scroll position) */
+  onBeforeNavigate?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -348,27 +350,25 @@ export default function PersonDetailSheet({
   onCheckIn,
   onChangeRoom,
   defaultPage = 'main',
+  onBeforeNavigate,
 }: PersonDetailSheetProps) {
   const [household, setHousehold] = useState<HouseholdWithMembersResponse | null>(null);
-  const [contactId, setContactId] = useState<number | null>(null);
   const [householdLoading, setHouseholdLoading] = useState(false);
+  const contactId = person?.Contact_ID ?? null;
 
   // Fetch household on open
   useEffect(() => {
     if (!open || !person) {
       setHousehold(null);
-      setContactId(null);
       return;
     }
 
     setHouseholdLoading(true);
     setHousehold(null);
-    setContactId(null);
 
     fetch(`/api/room-manager/household?participantId=${person.Participant_ID}`)
       .then((res) => res.json())
       .then((data) => {
-        setContactId(data?.contactId ?? null);
         setHousehold(data?.household ?? null);
       })
       .catch(() => {
@@ -406,7 +406,10 @@ export default function PersonDetailSheet({
           roomName={roomName}
           contactId={contactId}
           onNavigate={(path) => {
-            onClose();
+            onBeforeNavigate?.();
+            // Close sheet UI only — don't clear personId from URL
+            // so the back button restores it
+            setHousehold(null);
             router.push(path);
           }}
         />
@@ -421,10 +424,10 @@ export default function PersonDetailSheet({
               <span className="text-foreground">{person.Group_Name}</span>
             </div>
           )}
-          {person.Group_Role_Title && (
+          {person.Role_Title && (
             <div className="text-sm">
               <span className="text-muted-foreground font-medium">Role:</span>{' '}
-              <span className="text-foreground">{person.Group_Role_Title}</span>
+              <span className="text-foreground">{person.Role_Title}</span>
             </div>
           )}
           {person.Gender && (
@@ -462,7 +465,8 @@ export default function PersonDetailSheet({
             data={household}
             participantId={person.Participant_ID}
             onMemberClick={(cId) => {
-              onClose();
+              onBeforeNavigate?.();
+              setHousehold(null);
               router.push(`/people/search?contactId=${cId}`);
             }}
           />

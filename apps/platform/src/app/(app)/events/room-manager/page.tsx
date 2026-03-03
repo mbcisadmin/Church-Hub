@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
 import {
   DoorOpen,
@@ -178,10 +179,10 @@ function PersonCard({
 
       {/* Session info */}
       <div className="bg-card space-y-1.5 px-3 py-2.5">
-        {person.Group_Role_Title && (
+        {person.Role_Title && (
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <User className="h-3 w-3 shrink-0" />
-            <span className="truncate">{person.Group_Role_Title}</span>
+            <span className="truncate">{person.Role_Title}</span>
           </div>
         )}
         {formattedTime && (
@@ -243,14 +244,100 @@ function PersonCard({
 // Main Page
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Scroll position key for sessionStorage
+// ---------------------------------------------------------------------------
+const SCROLL_KEY = 'room-manager-scroll';
+
 export default function RoomManagerPage() {
+  return (
+    <Suspense>
+      <RoomManagerContent />
+    </Suspense>
+  );
+}
+
+function RoomManagerContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     document.title = 'Room Manager | The Hub';
   }, []);
 
-  // Selection state
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
+  // ---------------------------------------------------------------------------
+  // URL-synced state — read from search params, write via router.replace
+  // ---------------------------------------------------------------------------
+  const selectedDate = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
+  const selectedEventId = searchParams.get('eventId')
+    ? parseInt(searchParams.get('eventId')!, 10)
+    : null;
+  const selectedRoomId = searchParams.get('roomId') || 'all';
+  const searchQuery = searchParams.get('q') || '';
+  const personIdParam = searchParams.get('personId')
+    ? parseInt(searchParams.get('personId')!, 10)
+    : null;
+
+  /**
+   * Update one or more URL search params via router.replace (no history entry).
+   * Uses a ref to buffer pending updates so rapid successive calls (e.g. DateSwiper
+   * calling onDateChange then onEventChange in the same tick) merge correctly
+   * instead of the second call reading stale searchParams.
+   */
+  const pendingRef = useRef<Record<string, string | null> | null>(null);
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      // Merge into pending buffer
+      pendingRef.current = { ...pendingRef.current, ...updates };
+
+      // Flush on next microtask so all sync calls in the same tick merge
+      queueMicrotask(() => {
+        const pending = pendingRef.current;
+        if (!pending) return;
+        pendingRef.current = null;
+
+        const params = new URLSearchParams(searchParams.toString());
+        for (const [key, value] of Object.entries(pending)) {
+          if (value === null || value === '') {
+            params.delete(key);
+          } else {
+            params.set(key, value);
+          }
+        }
+        const qs = params.toString();
+        router.replace(qs ? `?${qs}` : window.location.pathname, { scroll: false });
+      });
+    },
+    [searchParams, router]
+  );
+
+  const setSelectedDate = useCallback(
+    (date: string) => {
+      updateParams({ date, eventId: null, personId: null });
+    },
+    [updateParams]
+  );
+
+  const setSelectedEventId = useCallback(
+    (eventId: number | null) => {
+      updateParams({ eventId: eventId != null ? String(eventId) : null, personId: null });
+    },
+    [updateParams]
+  );
+
+  const setSelectedRoomId = useCallback(
+    (roomId: string) => {
+      updateParams({ roomId: roomId === 'all' ? null : roomId });
+    },
+    [updateParams]
+  );
+
+  const setSearchQuery = useCallback(
+    (q: string) => {
+      updateParams({ q: q || null });
+    },
+    [updateParams]
+  );
 
   // Data
   const { data, isLoading, error, executeAction } = useRoomManagerData(selectedEventId);
@@ -264,17 +351,51 @@ export default function RoomManagerPage() {
     setSelectedPerson(person);
     setSheetDefaultPage('main');
     setPersonSheetOpen(true);
+    updateParams({ personId: String(person.Event_Participant_ID) });
   };
+
+  const handleCloseSheet = useCallback(() => {
+    setPersonSheetOpen(false);
+    updateParams({ personId: null });
+  }, [updateParams]);
 
   const handleMoveRoom = (person: EventParticipant) => {
     setSelectedPerson(person);
     setSheetDefaultPage('move-room');
     setPersonSheetOpen(true);
+    updateParams({ personId: String(person.Event_Participant_ID) });
   };
 
-  // Search & filter state
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRoomId, setSelectedRoomId] = useState<string>('all');
+  // ---------------------------------------------------------------------------
+  // Restore person sheet from URL param on data load
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!personIdParam || !data?.participants || personSheetOpen) return;
+    const participant = data.participants.find((p) => p.Event_Participant_ID === personIdParam);
+    if (participant) {
+      setSelectedPerson(participant);
+      setSheetDefaultPage('main');
+      setPersonSheetOpen(true);
+    }
+  }, [personIdParam, data?.participants]);
+
+  // ---------------------------------------------------------------------------
+  // Scroll position save/restore
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!personIdParam || !data?.participants) return;
+    // Restore scroll position when returning via back button
+    const saved = sessionStorage.getItem(SCROLL_KEY);
+    if (saved) {
+      requestAnimationFrame(() => {
+        const scrollContainer = document.querySelector('.main-wrapper [class*="overflow-y"]');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = parseInt(saved, 10);
+        }
+        sessionStorage.removeItem(SCROLL_KEY);
+      });
+    }
+  }, [personIdParam, data?.participants]);
 
   const handleCheckOut = (person: EventParticipant) => {
     executeAction(
@@ -555,8 +676,15 @@ export default function RoomManagerPage() {
 
       <PersonDetailSheet
         open={personSheetOpen}
-        onClose={() => setPersonSheetOpen(false)}
+        onClose={handleCloseSheet}
         person={selectedPerson}
+        onBeforeNavigate={() => {
+          // Save scroll position before navigating away
+          const scrollContainer = document.querySelector('.main-wrapper [class*="overflow-y"]');
+          if (scrollContainer) {
+            sessionStorage.setItem(SCROLL_KEY, String(scrollContainer.scrollTop));
+          }
+        }}
         roomName={selectedPerson?.Room_Name ?? null}
         rooms={data?.rooms ?? []}
         onCheckOut={handleCheckOut}

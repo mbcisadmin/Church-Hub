@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Search,
   Mail,
@@ -16,6 +16,7 @@ import {
   Send,
   MessageSquare,
   User,
+  ArrowLeft,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/ui/section-header';
 import {
@@ -216,7 +217,9 @@ function TextSheetHeader({
 
 function PeopleSearchContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const isDeepLinked = !!searchParams.get('contactId');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Contact[]>([]);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -512,6 +515,17 @@ function PeopleSearchContent() {
   return (
     <div className="bg-background pt-8 pb-8 md:pt-16">
       <div className="mx-auto max-w-[1600px] px-4 md:px-6">
+        {/* Back button — shown when deep-linked from another page */}
+        {isDeepLinked && (
+          <button
+            onClick={() => router.back()}
+            className="text-muted-foreground hover:text-foreground mb-2 flex items-center gap-1.5 text-sm font-medium transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+        )}
+
         {/* Header */}
         <SectionHeader
           title="People Search"
@@ -661,7 +675,7 @@ function PeopleSearchContent() {
         {/* Contact Details - Responsive Sheet (mobile bottom sheet, desktop modal) */}
         <ResponsiveSheet
           open={showDetailsPanel}
-          onClose={handleClearSelection}
+          onClose={isDeepLinked ? () => router.back() : handleClearSelection}
           panelClassName="bg-card overflow-hidden"
           maxWidth="max-w-3xl"
           noPanelPadding
@@ -681,6 +695,7 @@ function PeopleSearchContent() {
                 onNavigateEmail={() => ctx.navigate('email')}
                 onNavigatePhone={() => ctx.navigate('phone')}
                 section="contactInfo"
+                onBack={isDeepLinked ? () => router.back() : undefined}
               />
             ) : ctx.currentPage === 'email' ? (
               <EmailSheetHeader email={selectedContact?.Email_Address || ''} />
@@ -746,6 +761,7 @@ function ContactDetailsContent({
   onNavigateEmail,
   onNavigatePhone,
   section = 'all',
+  onBack,
 }: {
   selectedContact: Contact | null;
   isLoadingDetails?: boolean;
@@ -762,6 +778,8 @@ function ContactDetailsContent({
   onNavigatePhone?: () => void;
   /** Which section to render: 'all', 'contactInfo' (header), or 'household' (scrollable) */
   section?: 'all' | 'contactInfo' | 'household';
+  /** If provided, renders a back button in the header */
+  onBack?: () => void;
 }) {
   const { mode } = useResponsiveSheet();
   const isModal = mode === 'modal';
@@ -802,6 +820,16 @@ function ContactDetailsContent({
               <div className="mb-3 flex justify-center md:hidden">
                 <div className="h-1.5 w-14 rounded-full bg-white/30" />
               </div>
+              {/* Back button — when deep-linked from another page */}
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="relative z-10 mb-2 flex items-center gap-1 text-sm font-medium text-white/70 transition-colors hover:text-white"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+                </button>
+              )}
               {/* User icon watermark */}
               <div className="pointer-events-none absolute right-2 bottom-2 md:top-1/2 md:-right-4 md:bottom-auto md:-translate-y-1/2">
                 <User className="h-28 w-28 text-white opacity-10 md:h-40 md:w-40" />
