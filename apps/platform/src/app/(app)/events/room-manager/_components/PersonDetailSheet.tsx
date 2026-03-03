@@ -56,7 +56,7 @@ function getNewBadge(
 }
 
 function isVolunteer(p: EventParticipant): boolean {
-  return p.Group_Role_Type_ID === 3;
+  return p.Group_Role_Type_ID === 1 || p.Group_Role_Type_ID === 3;
 }
 
 /** MP returns datetimes as local server time with a Z suffix — strip it so JS treats as local */
