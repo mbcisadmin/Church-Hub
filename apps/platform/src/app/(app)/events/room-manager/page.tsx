@@ -148,16 +148,18 @@ function PersonCard({
       onClick={() => onPersonClick(person)}
     >
       {/* Card header — branded with avatar, name, age */}
-      <div className={`relative flex flex-col items-center px-3 pt-4 pb-3 ${headerBg}`}>
-        {/* Status badge top-right */}
-        {badge && (
-          <span
-            className={`absolute top-2 right-2 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold uppercase ${badge.colorClasses}`}
-          >
-            <badge.Icon className="h-2.5 w-2.5" />
-            {badge.label}
-          </span>
-        )}
+      <div className={`flex flex-col items-center px-3 pt-2 pb-5 ${headerBg}`}>
+        {/* Status badge row — always reserved for consistent card height */}
+        <div className="mb-1.5 flex h-[14px] w-full justify-end">
+          {badge && (
+            <span
+              className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold uppercase ${badge.colorClasses}`}
+            >
+              <badge.Icon className="h-2.5 w-2.5" />
+              {badge.label}
+            </span>
+          )}
+        </div>
 
         <PersonAvatar person={person} size="md" />
         <p
