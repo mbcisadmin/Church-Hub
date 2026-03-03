@@ -10,6 +10,11 @@ import {
   ArrowRightLeft,
   LogOut,
   ChevronRight,
+  Sparkles,
+  RotateCcw,
+  MapPin,
+  BookOpen,
+  type LucideIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
@@ -18,6 +23,41 @@ import {
   useResponsiveSheet,
 } from '@church/nextjs-ui/components/ResponsiveSheet';
 import type { EventParticipant, Room } from '@/types/roomManager';
+
+/** Priority-based "new" badge resolver — returns the first truthy status */
+function getNewBadge(
+  p: EventParticipant
+): { label: string; colorClasses: string; Icon: LucideIcon } | null {
+  if (p.Is_New)
+    return {
+      label: 'New visitor',
+      colorClasses: 'text-green-600 dark:text-green-400',
+      Icon: Sparkles,
+    };
+  if (p.Is_New_Again)
+    return {
+      label: 'Returning visitor',
+      colorClasses: 'text-blue-600 dark:text-blue-400',
+      Icon: RotateCcw,
+    };
+  if (p.Is_New_to_Congregation)
+    return {
+      label: 'New to campus',
+      colorClasses: 'text-purple-600 dark:text-purple-400',
+      Icon: MapPin,
+    };
+  if (p.Is_New_to_Program)
+    return {
+      label: 'New to program',
+      colorClasses: 'text-amber-600 dark:text-amber-400',
+      Icon: BookOpen,
+    };
+  return null;
+}
+
+function isVolunteer(p: EventParticipant): boolean {
+  return p.Group_Role_Type_ID === 3;
+}
 
 /** MP returns datetimes as local server time with a Z suffix — strip it so JS treats as local */
 function parseMpDate(dateStr: string): Date {
@@ -164,8 +204,10 @@ function PersonDetailHeader({
   const name = `${firstName} ${person.Last_Name ?? ''}`.trim();
   const initials = `${firstName.charAt(0)}${(person.Last_Name ?? '').charAt(0)}`.toUpperCase();
 
+  const headerBg = isVolunteer(person) ? 'bg-neutral-700' : 'bg-primary';
+
   return (
-    <div className="bg-primary relative overflow-hidden px-4 pt-4 pb-5 md:px-6 md:pt-6 md:pb-6">
+    <div className={`${headerBg} relative overflow-hidden px-4 pt-4 pb-5 md:px-6 md:pt-6 md:pb-6`}>
       {/* Mobile drag handle */}
       <div className="mb-3 flex justify-center md:hidden">
         <div className="h-1.5 w-14 rounded-full bg-white/30" />
@@ -401,11 +443,17 @@ export default function PersonDetailSheet({
               </span>
             </div>
           )}
-          {person.Is_New && (
-            <div className="text-sm font-medium text-green-600 dark:text-green-400">
-              New visitor
-            </div>
-          )}
+          {(() => {
+            const badge = getNewBadge(person);
+            return badge ? (
+              <div
+                className={`flex items-center gap-1.5 text-sm font-medium ${badge.colorClasses}`}
+              >
+                <badge.Icon className="h-3.5 w-3.5" />
+                {badge.label}
+              </div>
+            ) : null;
+          })()}
         </div>
 
         {/* Household */}

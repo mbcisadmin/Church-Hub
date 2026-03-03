@@ -14,6 +14,11 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  Sparkles,
+  RotateCcw,
+  MapPin,
+  BookOpen,
+  type LucideIcon,
 } from 'lucide-react';
 import { SectionHeader } from '@/components/ui/section-header';
 import { SectionTitle } from '@church/nextjs-ui/components/SectionTitle';
@@ -80,6 +85,33 @@ function parseMpDate(dateStr: string): Date {
   return new Date(dateStr.replace(/Z$/i, ''));
 }
 
+/** Priority-based "new" badge resolver — returns the first truthy status */
+function getNewBadge(
+  p: EventParticipant
+): { label: string; colorClasses: string; Icon: LucideIcon } | null {
+  if (p.Is_New)
+    return { label: 'New', colorClasses: 'bg-green-400/20 text-green-200', Icon: Sparkles };
+  if (p.Is_New_Again)
+    return { label: 'Returning', colorClasses: 'bg-blue-400/20 text-blue-200', Icon: RotateCcw };
+  if (p.Is_New_to_Congregation)
+    return {
+      label: 'New to Campus',
+      colorClasses: 'bg-purple-400/20 text-purple-200',
+      Icon: MapPin,
+    };
+  if (p.Is_New_to_Program)
+    return {
+      label: 'New to Program',
+      colorClasses: 'bg-amber-400/20 text-amber-200',
+      Icon: BookOpen,
+    };
+  return null;
+}
+
+function isVolunteer(p: EventParticipant): boolean {
+  return p.Group_Role_Type_ID === 3;
+}
+
 // ---------------------------------------------------------------------------
 // Person Card
 // ---------------------------------------------------------------------------
@@ -103,6 +135,12 @@ function PersonCard({
   const timeOut = person.Time_Out ? parseMpDate(person.Time_Out) : null;
   const formattedTimeOut = timeOut ? format(timeOut, 'h:mm a') : '';
   const isLoading = person._loading;
+  const badge = getNewBadge(person);
+  const headerBg = isCheckedOut
+    ? 'bg-muted'
+    : isVolunteer(person)
+      ? 'bg-neutral-700'
+      : 'bg-primary';
 
   return (
     <div
@@ -110,13 +148,14 @@ function PersonCard({
       onClick={() => onPersonClick(person)}
     >
       {/* Card header — branded with avatar, name, age */}
-      <div
-        className={`relative flex flex-col items-center px-3 pt-4 pb-3 ${isCheckedOut ? 'bg-muted' : 'bg-primary'}`}
-      >
-        {/* NEW badge top-right */}
-        {person.Is_New && (
-          <span className="absolute top-2 right-2 rounded-full bg-green-400/20 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-green-200 uppercase">
-            New
+      <div className={`relative flex flex-col items-center px-3 pt-4 pb-3 ${headerBg}`}>
+        {/* Status badge top-right */}
+        {badge && (
+          <span
+            className={`absolute top-2 right-2 flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold uppercase ${badge.colorClasses}`}
+          >
+            <badge.Icon className="h-2.5 w-2.5" />
+            {badge.label}
           </span>
         )}
 

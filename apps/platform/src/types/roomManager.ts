@@ -53,6 +53,10 @@ export interface EventParticipant {
   Time_Out: string | null;
   Group_Role_ID: number | null;
   Is_New: boolean | null;
+  Is_New_Again: boolean | null;
+  Is_New_to_Congregation: boolean | null;
+  Is_New_to_Program: boolean | null;
+  Group_Role_Type_ID: number | null;
   Image_URL: string | null;
   Gender: string | null;
   Group_Name: string | null;
