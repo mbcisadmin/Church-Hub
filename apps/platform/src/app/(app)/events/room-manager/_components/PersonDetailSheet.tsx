@@ -421,10 +421,10 @@ export default function PersonDetailSheet({
               <span className="text-foreground">{person.Group_Name}</span>
             </div>
           )}
-          {person.Group_Role_Type && (
+          {person.Group_Role_Title && (
             <div className="text-sm">
               <span className="text-muted-foreground font-medium">Role:</span>{' '}
-              <span className="text-foreground">{person.Group_Role_Type}</span>
+              <span className="text-foreground">{person.Group_Role_Title}</span>
             </div>
           )}
           {person.Gender && (

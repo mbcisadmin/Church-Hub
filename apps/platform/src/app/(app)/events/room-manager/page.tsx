@@ -184,12 +184,6 @@ function PersonCard({
             <span className="truncate">{person.Group_Role_Title}</span>
           </div>
         )}
-        {person.Group_Role_Type && (
-          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-            <Users className="h-3 w-3 shrink-0" />
-            <span className="truncate">{person.Group_Role_Type}</span>
-          </div>
-        )}
         {formattedTime && (
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Clock className="h-3 w-3 shrink-0" />
