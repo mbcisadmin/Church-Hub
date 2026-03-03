@@ -18,7 +18,6 @@ import {
 import { SectionHeader } from '@/components/ui/section-header';
 import { SectionTitle } from '@church/nextjs-ui/components/SectionTitle';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 import RoomManagerHeader from './_components/RoomManagerHeader';
 import PersonDetailSheet from './_components/PersonDetailSheet';
 import { useRoomManagerData } from './_components/useRoomManagerData';
@@ -127,28 +126,38 @@ function PersonCard({
         >
           {personName(person)}
         </p>
-        {person.Age != null && (
+        {(person.Age != null || person.Gender) && (
           <p className={`text-xs ${isCheckedOut ? 'text-muted-foreground/60' : 'text-white/60'}`}>
-            Age {person.Age}
+            {[person.Age != null ? `Age ${person.Age}` : null, person.Gender]
+              .filter(Boolean)
+              .join(' · ')}
           </p>
         )}
       </div>
 
       {/* Session info */}
       <div className="bg-card space-y-1.5 px-3 py-2.5">
-        {person.Role_Title && (
+        {person.Group_Role_Title && (
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <User className="h-3 w-3 shrink-0" />
-            <span className="truncate">{person.Role_Title}</span>
+            <span className="truncate">{person.Group_Role_Title}</span>
+          </div>
+        )}
+        {person.Group_Role_Type && (
+          <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+            <Users className="h-3 w-3 shrink-0" />
+            <span className="truncate">{person.Group_Role_Type}</span>
           </div>
         )}
         {formattedTime && (
           <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
             <Clock className="h-3 w-3 shrink-0" />
-            <span>In {formattedTime}</span>
-            {isCheckedOut && formattedTimeOut && (
-              <span className="text-muted-foreground/60">· Out {formattedTimeOut}</span>
-            )}
+            <span>
+              In {formattedTime}
+              {isCheckedOut && formattedTimeOut && (
+                <span className="text-muted-foreground/60"> · Out {formattedTimeOut}</span>
+              )}
+            </span>
           </div>
         )}
       </div>
@@ -234,33 +243,50 @@ export default function RoomManagerPage() {
   const [showAll, setShowAll] = useState(true);
 
   const handleCheckOut = (person: EventParticipant) => {
-    toast.success(`${personName(person)} checked out`);
-    executeAction({ type: 'checkOut', eventParticipantId: person.Event_Participant_ID });
+    executeAction(
+      { type: 'checkOut', eventParticipantId: person.Event_Participant_ID },
+      `${personName(person)} checked out`
+    );
   };
 
   const handleCheckIn = (person: EventParticipant) => {
-    toast.success(`${personName(person)} checked back in`);
-    executeAction({ type: 'checkIn', eventParticipantId: person.Event_Participant_ID });
+    executeAction(
+      { type: 'checkIn', eventParticipantId: person.Event_Participant_ID },
+      `${personName(person)} checked back in`
+    );
   };
 
   const handleChangeRoom = (person: EventParticipant, roomId: number | null) => {
-    if (roomId === null) {
-      toast.success(`${personName(person)} unassigned from room`);
-    } else {
-      const targetRoom = data?.rooms.find((r) => r.Room_ID === roomId);
-      toast.success(`${personName(person)} moved to ${targetRoom?.Room_Name ?? 'new room'}`);
-    }
-    executeAction({
-      type: 'changeRoom',
-      eventParticipantId: person.Event_Participant_ID,
-      newRoomId: roomId,
-    });
+    const msg =
+      roomId === null
+        ? `${personName(person)} unassigned from room`
+        : `${personName(person)} moved to ${data?.rooms.find((r) => r.Room_ID === roomId)?.Room_Name ?? 'new room'}`;
+    executeAction(
+      { type: 'changeRoom', eventParticipantId: person.Event_Participant_ID, newRoomId: roomId },
+      msg
+    );
   };
 
   const handleCloseRoom = (roomId: number) => {
     const room = data?.rooms.find((r) => r.Room_ID === roomId);
-    toast.success(`${room?.Room_Name ?? 'Room'} closed`);
-    executeAction({ type: 'closeRoom', roomId });
+    const eventRoomIds = (data?.eventRooms ?? [])
+      .filter((er) => er.Room_ID === roomId)
+      .map((er) => er.Event_Room_ID);
+    executeAction(
+      { type: 'closeRoom', roomId, eventRoomIds },
+      `${room?.Room_Name ?? 'Room'} closed`
+    );
+  };
+
+  const handleOpenRoom = (roomId: number) => {
+    const room = data?.rooms.find((r) => r.Room_ID === roomId);
+    const eventRoomIds = (data?.eventRooms ?? [])
+      .filter((er) => er.Room_ID === roomId)
+      .map((er) => er.Event_Room_ID);
+    executeAction(
+      { type: 'openRoom', roomId, eventRoomIds },
+      `${room?.Room_Name ?? 'Room'} opened`
+    );
   };
 
   // Filter participants by search and checked-in status
@@ -415,51 +441,105 @@ export default function RoomManagerPage() {
                         const isUnassigned = room.Room_ID === null;
                         const checkedIn = room.Still_Checked_In ?? allPeople.length;
 
+                        // Check if all event rooms for this physical room are closed
+                        const roomEventRooms = (data.eventRooms ?? []).filter(
+                          (er) => er.Room_ID === room.Room_ID
+                        );
+                        const isRoomClosed =
+                          !isUnassigned &&
+                          roomEventRooms.length > 0 &&
+                          roomEventRooms.every((er) => er.Closed);
+
                         // Hide rooms with no matching people when searching
                         if (searchQuery.trim() && people.length === 0) return null;
 
-                        const volunteers = allPeople.filter((p) => p.Group_Role_ID !== null).length;
-                        const kids = allPeople.length - volunteers;
-                        const ratioLabel = `(${volunteers}V : ${kids}K)`;
-
                         const capacityLabel =
                           !isUnassigned && room.Maximum_Capacity
-                            ? `Capacity: ${checkedIn} / ${room.Maximum_Capacity} ${ratioLabel}`
-                            : `${checkedIn} checked in ${ratioLabel}`;
+                            ? `Capacity: ${checkedIn} / ${room.Maximum_Capacity}`
+                            : `${checkedIn} checked in`;
 
                         return (
                           <div key={room.Room_ID ?? 'unassigned'}>
-                            <SectionTitle
-                              icon={isUnassigned ? AlertTriangle : DoorOpen}
-                              title={isUnassigned ? 'No Room Assigned' : room.Room_Name}
-                              subtitle={capacityLabel}
-                              action={!isUnassigned && room.Room_ID != null ? 'Close' : undefined}
-                              onAction={
-                                !isUnassigned && room.Room_ID != null
-                                  ? () => handleCloseRoom(room.Room_ID!)
-                                  : undefined
-                              }
-                            />
+                            <div className="bg-background/80 sticky top-0 z-10 -mx-[calc((100vw-100%)/2)] rounded-b-[12px] px-[calc((100vw-100%)/2+1rem)] pt-2 pb-2 backdrop-blur-lg">
+                              <SectionTitle
+                                icon={isUnassigned ? AlertTriangle : isRoomClosed ? Lock : DoorOpen}
+                                title={
+                                  isUnassigned
+                                    ? 'No Room Assigned'
+                                    : `${room.Room_Name}${isRoomClosed ? ' (Closed)' : ''}`
+                                }
+                                subtitle={capacityLabel}
+                                action={
+                                  !isUnassigned && room.Room_ID != null
+                                    ? isRoomClosed
+                                      ? 'Open'
+                                      : 'Close'
+                                    : undefined
+                                }
+                                onAction={
+                                  !isUnassigned && room.Room_ID != null
+                                    ? isRoomClosed
+                                      ? () => handleOpenRoom(room.Room_ID!)
+                                      : () => handleCloseRoom(room.Room_ID!)
+                                    : undefined
+                                }
+                              />
+                            </div>
 
-                            {/* People grid */}
-                            {people.length > 0 ? (
-                              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                {people.map((person) => (
-                                  <PersonCard
-                                    key={person.Event_Participant_ID}
-                                    person={person}
-                                    onCheckOut={handleCheckOut}
-                                    onCheckIn={handleCheckIn}
-                                    onMoveRoom={handleMoveRoom}
-                                    onPersonClick={handlePersonClick}
-                                  />
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="text-muted-foreground py-4 text-center text-xs">
-                                No one checked in
-                              </div>
-                            )}
+                            {/* People grid — sub-grouped by Group_Name */}
+                            <div
+                              className={`transition-all duration-300 ${isRoomClosed ? 'opacity-40 grayscale' : ''}`}
+                            >
+                              {people.length > 0 ? (
+                                (() => {
+                                  // Group people by Group_Name, preserving order
+                                  const grouped = new Map<string, EventParticipant[]>();
+                                  for (const p of people) {
+                                    const key = p.Group_Name ?? '';
+                                    if (!grouped.has(key)) grouped.set(key, []);
+                                    grouped.get(key)!.push(p);
+                                  }
+
+                                  return (
+                                    <div className="space-y-6">
+                                      {Array.from(grouped.entries()).map(
+                                        ([groupName, members], idx) => (
+                                          <div key={groupName || '_ungrouped'}>
+                                            {groupName && (
+                                              <div
+                                                className={`flex items-center gap-4 py-2 ${idx > 0 ? 'mt-2' : ''}`}
+                                              >
+                                                <div className="bg-border/50 h-px flex-1" />
+                                                <span className="text-muted-foreground shrink-0 text-sm font-semibold tracking-wide uppercase">
+                                                  {groupName}
+                                                </span>
+                                                <div className="bg-border/50 h-px flex-1" />
+                                              </div>
+                                            )}
+                                            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                              {members.map((person) => (
+                                                <PersonCard
+                                                  key={person.Event_Participant_ID}
+                                                  person={person}
+                                                  onCheckOut={handleCheckOut}
+                                                  onCheckIn={handleCheckIn}
+                                                  onMoveRoom={handleMoveRoom}
+                                                  onPersonClick={handlePersonClick}
+                                                />
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                  );
+                                })()
+                              ) : (
+                                <div className="text-muted-foreground py-4 text-center text-xs">
+                                  No one checked in
+                                </div>
+                              )}
+                            </div>
                           </div>
                         );
                       })}

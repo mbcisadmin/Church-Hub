@@ -63,7 +63,7 @@ export function useRoomManagerData(eventId: number | null) {
   }, [eventId, fetchData]);
 
   const executeAction = useCallback(
-    async (action: RoomManagerAction) => {
+    async (action: RoomManagerAction, successMessage?: string) => {
       if (!eventId || !data) return;
 
       // Optimistic UI updates
@@ -200,13 +200,25 @@ export function useRoomManagerData(eventId: number | null) {
           break;
         }
         case 'closeRoom': {
-          // Optimistic: mark all event rooms for this room as closed
           setData((prev) =>
             prev
               ? {
                   ...prev,
                   eventRooms: prev.eventRooms.map((er) =>
                     er.Room_ID === action.roomId ? { ...er, Closed: true, _loading: true } : er
+                  ),
+                }
+              : prev
+          );
+          break;
+        }
+        case 'openRoom': {
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  eventRooms: prev.eventRooms.map((er) =>
+                    er.Room_ID === action.roomId ? { ...er, Closed: false, _loading: true } : er
                   ),
                 }
               : prev
@@ -224,8 +236,11 @@ export function useRoomManagerData(eventId: number | null) {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to execute action');
+          const body = await response.json().catch(() => ({}));
+          throw new Error(body.detail || 'Failed to execute action');
         }
+
+        if (successMessage) toast.success(successMessage);
 
         // Re-fetch to get authoritative data
         await fetchData(eventId, true);

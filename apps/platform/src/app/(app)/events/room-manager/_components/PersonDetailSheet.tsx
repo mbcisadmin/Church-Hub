@@ -373,26 +373,37 @@ export default function PersonDetailSheet({
     >
       <SheetPage name="main">
         {/* Session Info */}
-        <div className="space-y-2 border-b px-4 py-4 md:px-6">
-          {person.Role_Title && (
-            <div className="text-foreground flex items-center gap-2 text-sm">
-              <User className="text-muted-foreground h-4 w-4 shrink-0" />
-              <span>{person.Role_Title}</span>
+        <div className="space-y-2.5 border-b px-4 py-4 md:px-6">
+          {person.Group_Name && (
+            <div className="text-sm">
+              <span className="text-muted-foreground font-medium">Group:</span>{' '}
+              <span className="text-foreground">{person.Group_Name}</span>
+            </div>
+          )}
+          {person.Group_Role_Type && (
+            <div className="text-sm">
+              <span className="text-muted-foreground font-medium">Role:</span>{' '}
+              <span className="text-foreground">{person.Group_Role_Type}</span>
+            </div>
+          )}
+          {person.Gender && (
+            <div className="text-sm">
+              <span className="text-muted-foreground font-medium">Gender:</span>{' '}
+              <span className="text-foreground">{person.Gender}</span>
             </div>
           )}
           {formattedTime && (
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 shrink-0" />
-              <span>
+            <div className="text-sm">
+              <span className="text-muted-foreground font-medium">Time:</span>{' '}
+              <span className="text-foreground">
                 In {formattedTime}
                 {isCheckedOut && formattedTimeOut && <span> · Out {formattedTimeOut}</span>}
               </span>
             </div>
           )}
           {person.Is_New && (
-            <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <Users className="h-4 w-4 shrink-0" />
-              <span>New visitor</span>
+            <div className="text-sm font-medium text-green-600 dark:text-green-400">
+              New visitor
             </div>
           )}
         </div>

@@ -4,6 +4,8 @@ import {
   closeAllGroupsInRoom,
   updateEventRoom,
   updateEventParticipant,
+  closeEventRooms,
+  openEventRooms,
 } from '@/services/roomManagerService';
 import type { RoomManagerAction } from '@/types/roomManager';
 
@@ -62,13 +64,30 @@ export async function POST(request: NextRequest) {
         );
         break;
 
+      case 'closeRoom':
+        await closeEventRooms(action.eventRoomIds, userId);
+        break;
+
+      case 'openRoom':
+        await openEventRooms(action.eventRoomIds, userId);
+        break;
+
       default:
         return NextResponse.json({ error: 'Unknown action type' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error executing room manager action:', error);
-    return NextResponse.json({ error: 'Failed to execute action' }, { status: 500 });
+    console.error(
+      'Error executing room manager action:',
+      error instanceof Error ? error.message : error
+    );
+    return NextResponse.json(
+      {
+        error: 'Failed to execute action',
+        detail: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
 }

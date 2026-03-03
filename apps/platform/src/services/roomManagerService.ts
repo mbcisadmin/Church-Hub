@@ -30,49 +30,104 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
   const participants = (result[3] || []) as EventParticipant[];
   const groups = (result[4] || []) as EventGroup[];
 
-  // Fetch profile image GUIDs from Contacts table via Participant_Record
+  // Enrich participants with additional data from MP tables
   const fileBaseUrl = process.env.NEXT_PUBLIC_MINISTRY_PLATFORM_FILE_URL;
-  let imageMap = new Map<number, string>();
+  const imageMap = new Map<number, string>();
+  const genderMap = new Map<number, string>();
+  const groupInfoMap = new Map<
+    number,
+    { Group_Name: string | null; Group_Role_Title: string | null; Group_Role_Type: string | null }
+  >();
 
-  if (fileBaseUrl && participants.length > 0) {
+  if (participants.length > 0) {
     const participantIds = participants.map((p) => p.Participant_ID).filter((id) => id != null);
+    const eventParticipantIds = participants
+      .map((p) => p.Event_Participant_ID)
+      .filter((id) => id != null);
 
-    // Batch in chunks of 25 to avoid overly long filters
     const BATCH_SIZE = 25;
+
+    // Fetch contacts (images + gender) in batches
     for (let i = 0; i < participantIds.length; i += BATCH_SIZE) {
       const batch = participantIds.slice(i, i + BATCH_SIZE);
       try {
         const filter = batch.map((id) => `Participant_Record=${id}`).join(' OR ');
-        // MP renames dp_fileUniqueId to Column_N in the response
         const contacts = await tableService.getTableRecords<Record<string, unknown>>('Contacts', {
-          $select: 'Participant_Record,dp_fileUniqueId',
+          $select: 'Participant_Record,dp_fileUniqueId,Gender_ID_Table.Gender',
           $filter: filter,
         });
 
         for (const c of contacts) {
-          const participantRecord = c.Participant_Record as number;
-          // Find the GUID — it's the value that's not Participant_Record
-          const guid = Object.entries(c).find(
-            ([key, val]) =>
-              key !== 'Participant_Record' && typeof val === 'string' && val.length > 0
-          )?.[1] as string | undefined;
+          const pid = c.Participant_Record as number;
+          if (!pid) continue;
 
-          if (guid && participantRecord) {
-            imageMap.set(participantRecord, `${fileBaseUrl}/${guid}?$thumbnail=true`);
+          // Image GUID
+          if (fileBaseUrl) {
+            const guid = Object.entries(c).find(
+              ([key, val]) =>
+                key !== 'Participant_Record' &&
+                key !== 'Gender' &&
+                typeof val === 'string' &&
+                val.length > 0
+            )?.[1] as string | undefined;
+            if (guid) {
+              imageMap.set(pid, `${fileBaseUrl}/${guid}?$thumbnail=true`);
+            }
+          }
+
+          // Gender
+          if (c.Gender && typeof c.Gender === 'string') {
+            genderMap.set(pid, c.Gender);
           }
         }
       } catch (err) {
-        console.error('[RoomManager] Error fetching contact images (batch):', err);
-        break; // Don't keep trying if MP is rejecting the query
+        console.error('[RoomManager] Error fetching contacts (batch):', err);
+        break;
+      }
+    }
+
+    // Fetch group info from Event_Participants table in batches
+    for (let i = 0; i < eventParticipantIds.length; i += BATCH_SIZE) {
+      const batch = eventParticipantIds.slice(i, i + BATCH_SIZE);
+      try {
+        const filter = batch.map((id) => `Event_Participant_ID=${id}`).join(' OR ');
+        const epRecords = await tableService.getTableRecords<Record<string, unknown>>(
+          'Event_Participants',
+          {
+            $select:
+              'Event_Participant_ID,Group_Participant_ID_Table_Group_ID_Table.Group_Name,Group_Role_ID_Table.Role_Title,Group_Role_ID_Table_Group_Role_Type_ID_Table.Group_Role_Type',
+            $filter: filter,
+          }
+        );
+
+        for (const ep of epRecords) {
+          const epId = ep.Event_Participant_ID as number;
+          if (!epId) continue;
+          groupInfoMap.set(epId, {
+            Group_Name: (ep.Group_Name as string) ?? null,
+            Group_Role_Title: (ep.Role_Title as string) ?? null,
+            Group_Role_Type: (ep.Group_Role_Type as string) ?? null,
+          });
+        }
+      } catch (err) {
+        console.error('[RoomManager] Error fetching group info (batch):', err);
+        break;
       }
     }
   }
 
-  // Attach image URLs to participants
-  const participantsWithImages = participants.map((p) => ({
-    ...p,
-    Image_URL: imageMap.get(p.Participant_ID) ?? null,
-  }));
+  // Attach enriched data to participants
+  const enrichedParticipants = participants.map((p) => {
+    const groupInfo = groupInfoMap.get(p.Event_Participant_ID);
+    return {
+      ...p,
+      Image_URL: imageMap.get(p.Participant_ID) ?? null,
+      Gender: genderMap.get(p.Participant_ID) ?? null,
+      Group_Name: groupInfo?.Group_Name ?? null,
+      Group_Role_Title: groupInfo?.Group_Role_Title ?? null,
+      Group_Role_Type: groupInfo?.Group_Role_Type ?? null,
+    };
+  });
 
   return {
     event: events.length > 0 ? events[0] : null,
@@ -82,7 +137,7 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
       Closed: !!er.Closed,
       Auto_Close_At_Capacity: !!er.Auto_Close_At_Capacity,
     })),
-    participants: participantsWithImages,
+    participants: enrichedParticipants,
     groups,
   };
 }
@@ -91,11 +146,40 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
  * Close all groups in a room (set Closed = true on multiple Event_Room records)
  */
 export async function closeAllGroupsInRoom(eventRoomIds: number[], userId: number): Promise<void> {
+  if (eventRoomIds.length === 0) return;
   const updates = eventRoomIds.map((id) => ({
     Event_Room_ID: id,
     Closed: true,
   }));
   await tableService.updateTableRecords('Event_Rooms', updates, userId);
+}
+
+/**
+ * Close specific Event_Room records sequentially
+ */
+export async function closeEventRooms(eventRoomIds: number[], userId: number): Promise<void> {
+  if (eventRoomIds.length === 0) return;
+  for (const id of eventRoomIds) {
+    await tableService.updateTableRecords(
+      'Event_Rooms',
+      [{ Event_Room_ID: id, Closed: true }],
+      userId
+    );
+  }
+}
+
+/**
+ * Open specific Event_Room records sequentially
+ */
+export async function openEventRooms(eventRoomIds: number[], userId: number): Promise<void> {
+  if (eventRoomIds.length === 0) return;
+  for (const id of eventRoomIds) {
+    await tableService.updateTableRecords(
+      'Event_Rooms',
+      [{ Event_Room_ID: id, Closed: false }],
+      userId
+    );
+  }
 }
 
 /**

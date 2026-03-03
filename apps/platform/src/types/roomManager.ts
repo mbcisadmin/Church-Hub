@@ -54,6 +54,10 @@ export interface EventParticipant {
   Group_Role_ID: number | null;
   Is_New: boolean | null;
   Image_URL: string | null;
+  Gender: string | null;
+  Group_Name: string | null;
+  Group_Role_Title: string | null;
+  Group_Role_Type: string | null;
   _loading?: boolean;
 }
 
@@ -80,4 +84,5 @@ export type RoomManagerAction =
   | { type: 'checkOut'; eventParticipantId: number }
   | { type: 'checkIn'; eventParticipantId: number }
   | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number | null }
-  | { type: 'closeRoom'; roomId: number };
+  | { type: 'closeRoom'; roomId: number; eventRoomIds: number[] }
+  | { type: 'openRoom'; roomId: number; eventRoomIds: number[] };
