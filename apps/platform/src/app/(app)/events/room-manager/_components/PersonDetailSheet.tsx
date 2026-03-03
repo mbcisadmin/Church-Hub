@@ -220,7 +220,7 @@ function PersonDetailHeader({
 
       {/* Person info — clickable to people search */}
       <button
-        className="relative z-10 flex w-full items-center gap-4 text-left"
+        className={`relative z-10 flex w-full items-center gap-4 text-left ${contactId ? 'cursor-pointer' : ''}`}
         onClick={() => contactId && onNavigate(`/people/search?contactId=${contactId}`)}
         disabled={!contactId}
       >
@@ -232,7 +232,6 @@ function PersonDetailHeader({
           {person.Age != null && <p className="mt-0.5 text-sm text-white/70">Age {person.Age}</p>}
           {roomName && <p className="mt-0.5 text-sm text-white/70">{roomName}</p>}
         </div>
-        {contactId && <ChevronRight className="h-5 w-5 shrink-0 text-white/50" />}
       </button>
     </div>
   );
