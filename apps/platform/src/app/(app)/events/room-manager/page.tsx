@@ -240,7 +240,6 @@ export default function RoomManagerPage() {
   // Search & filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRoomId, setSelectedRoomId] = useState<string>('all');
-  const [showAll, setShowAll] = useState(true);
 
   const handleCheckOut = (person: EventParticipant) => {
     executeAction(
@@ -289,12 +288,9 @@ export default function RoomManagerPage() {
     );
   };
 
-  // Filter participants by search and checked-in status
+  // Filter participants by search
   const filterPeople = (people: EventParticipant[]) => {
     let filtered = people;
-    if (!showAll) {
-      filtered = filtered.filter((p) => !p.Time_Out);
-    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       filtered = filtered.filter((p) => personName(p).toLowerCase().includes(q));
@@ -354,7 +350,7 @@ export default function RoomManagerPage() {
                 return (
                   <div className="space-y-10">
                     {/* Search, Room filter & Show All toggle */}
-                    <div className="flex items-end gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
                       <div className="shrink-0">
                         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
                           Room
@@ -362,7 +358,7 @@ export default function RoomManagerPage() {
                         <select
                           value={selectedRoomId}
                           onChange={(e) => setSelectedRoomId(e.target.value)}
-                          className="border-input bg-background text-foreground focus:ring-primary h-10 rounded-lg border px-3 text-sm focus:ring-2 focus:outline-none"
+                          className="border-input bg-background text-foreground focus:ring-primary h-10 w-full rounded-lg border px-3 text-sm focus:ring-2 focus:outline-none sm:w-auto"
                         >
                           <option value="all">All Rooms</option>
                           {sortedRooms.map((room) => (
@@ -374,41 +370,6 @@ export default function RoomManagerPage() {
                             </option>
                           ))}
                         </select>
-                      </div>
-                      <div className="shrink-0">
-                        <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
-                          Status
-                        </label>
-                        <button
-                          onClick={() => setShowAll(!showAll)}
-                          className="border-input bg-background relative flex h-10 w-[4.75rem] cursor-pointer items-center rounded-full border p-1"
-                          aria-label={`Showing ${showAll ? 'all' : 'checked in'} people, click to toggle`}
-                        >
-                          <div
-                            className="absolute h-8 w-8 rounded-full shadow-sm ring-1 ring-black/[0.06] transition-transform duration-200 ease-out"
-                            style={{
-                              transform: showAll ? 'translateX(calc(100% + 2px))' : 'translateX(0)',
-                              background:
-                                'linear-gradient(145deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.12) 100%)',
-                              boxShadow:
-                                '0 2px 6px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.6)',
-                            }}
-                          />
-                          <div
-                            className={`relative z-10 flex h-8 w-8 items-center justify-center transition-colors duration-200 ${
-                              !showAll ? 'text-foreground' : 'text-muted-foreground/50'
-                            }`}
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                          </div>
-                          <div
-                            className={`relative z-10 flex h-8 w-8 items-center justify-center transition-colors duration-200 ${
-                              showAll ? 'text-foreground' : 'text-muted-foreground/50'
-                            }`}
-                          >
-                            <Users className="h-4 w-4" />
-                          </div>
-                        </button>
                       </div>
                       <div className="flex-1">
                         <label className="text-muted-foreground mb-1.5 block text-xs font-medium">
@@ -460,7 +421,7 @@ export default function RoomManagerPage() {
 
                         return (
                           <div key={room.Room_ID ?? 'unassigned'}>
-                            <div className="bg-background/80 sticky top-0 z-10 -mx-[calc((100vw-100%)/2)] rounded-b-[12px] px-[calc((100vw-100%)/2+1rem)] pt-2 pb-2 backdrop-blur-lg">
+                            <div className="bg-background/80 sticky top-0 z-10 -mx-[calc((100vw-100%)/2)] px-[calc((100vw-100%)/2+1rem)] pt-2 pb-2 backdrop-blur-lg">
                               <SectionTitle
                                 icon={isUnassigned ? AlertTriangle : isRoomClosed ? Lock : DoorOpen}
                                 title={
