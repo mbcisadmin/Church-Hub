@@ -212,7 +212,7 @@ export function BottomSheet({
       container.removeEventListener('touchstart', onTouchStart);
       container.removeEventListener('touchmove', onTouchMove);
     };
-  }, [open]);
+  }, [open, mounted]);
 
   // Native touch event listeners for drag-to-close (on drag area: handle + header)
   useEffect(() => {
@@ -268,7 +268,7 @@ export function BottomSheet({
       dragArea.removeEventListener('touchmove', handleTouchMove);
       dragArea.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [open, onClose, closeThreshold, velocityThreshold]);
+  }, [open, onClose, closeThreshold, velocityThreshold, mounted]);
 
   // Calculate transform based on open state and drag
   const panelTransform = open ? `translateY(${dragOffset}px)` : 'translateY(100%)';
