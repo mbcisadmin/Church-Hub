@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { format } from 'date-fns';
 import { Loader2, Users, UserCheck, User } from 'lucide-react';
 import { DateSwiper } from '@church/nextjs-ui/date-swiper';
 import { useCampus } from '@/contexts/CampusContext';
@@ -121,7 +120,7 @@ export default function RoomManagerHeader({
               <optgroup key={type} label={type}>
                 {typeEvents.map((event) => (
                   <option key={event.Event_ID} value={event.Event_ID}>
-                    {event.Event_Title} — {format(new Date(event.Event_Start_Date), 'h:mm a')}
+                    {event.Event_Title}
                   </option>
                 ))}
               </optgroup>
