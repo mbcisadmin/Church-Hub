@@ -224,9 +224,11 @@ function groupByPosition(
 function HouseholdSection({
   data,
   participantId,
+  onMemberClick,
 }: {
   data: HouseholdWithMembersResponse;
   participantId: number;
+  onMemberClick: (contactId: number) => void;
 }) {
   // Filter out the person we're already looking at
   const otherMembers = data.Members.filter((m) => m.Participant_Record !== participantId);
@@ -246,7 +248,11 @@ function HouseholdSection({
               const firstName = member.Nickname || member.First_Name;
               const name = `${firstName} ${member.Last_Name ?? ''}`.trim();
               return (
-                <div key={member.Contact_ID} className="flex items-center gap-3">
+                <button
+                  key={member.Contact_ID}
+                  onClick={() => onMemberClick(member.Contact_ID)}
+                  className="hover:bg-muted -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-all active:scale-[0.98]"
+                >
                   <MemberAvatar member={member} />
                   <div className="min-w-0 flex-1">
                     <p className="text-foreground truncate text-sm font-medium">{name}</p>
@@ -254,7 +260,8 @@ function HouseholdSection({
                       <p className="text-muted-foreground text-xs">Age {member.__Age}</p>
                     )}
                   </div>
-                </div>
+                  <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
+                </button>
               );
             })}
           </div>
@@ -393,7 +400,14 @@ export default function PersonDetailSheet({
         {/* Household */}
         {householdLoading && <HouseholdSkeleton />}
         {!householdLoading && household && (
-          <HouseholdSection data={household} participantId={person.Participant_ID} />
+          <HouseholdSection
+            data={household}
+            participantId={person.Participant_ID}
+            onMemberClick={(cId) => {
+              onClose();
+              router.push(`/people/search?contactId=${cId}`);
+            }}
+          />
         )}
 
         {/* Actions — always visible */}
