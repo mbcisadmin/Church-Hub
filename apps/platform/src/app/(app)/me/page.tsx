@@ -198,15 +198,7 @@ export default function ProfilePage() {
   }, [fetchProfile]);
 
   const handleSignOut = async () => {
-    const idToken = session?.idToken;
-    await signOut({ redirect: false });
-    const params = new URLSearchParams({
-      post_logout_redirect_uri: window.location.origin,
-    });
-    if (idToken) {
-      params.set('id_token_hint', idToken);
-    }
-    window.location.href = `${churchConfig.mpBaseUrl}/oauth/connect/endsession?${params.toString()}`;
+    await signOut({ redirectTo: '/' });
   };
 
   const formatAddress = () => {
