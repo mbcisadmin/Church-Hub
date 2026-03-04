@@ -51,6 +51,7 @@ export interface EventParticipant {
   Age: number | null;
   Time_in: string | null;
   Time_Out: string | null;
+  Group_ID: number | null;
   Group_Role_ID: number | null;
   Is_New: boolean | null;
   Is_New_Again: boolean | null;
@@ -89,4 +90,5 @@ export type RoomManagerAction =
   | { type: 'checkIn'; eventParticipantId: number }
   | { type: 'changeRoom'; eventParticipantId: number; newRoomId: number | null }
   | { type: 'closeRoom'; roomId: number; eventRoomIds: number[] }
-  | { type: 'openRoom'; roomId: number; eventRoomIds: number[] };
+  | { type: 'openRoom'; roomId: number; eventRoomIds: number[] }
+  | { type: 'moveGroup'; eventRoomId: number; newRoomId: number };

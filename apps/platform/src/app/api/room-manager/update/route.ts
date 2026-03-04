@@ -72,6 +72,10 @@ export async function POST(request: NextRequest) {
         await openEventRooms(action.eventRoomIds, userId);
         break;
 
+      case 'moveGroup':
+        await updateEventRoom(action.eventRoomId, { Room_ID: action.newRoomId }, userId);
+        break;
+
       default:
         return NextResponse.json({ error: 'Unknown action type' }, { status: 400 });
     }

@@ -1,17 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { ArrowRightLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Switch } from '@church/nextjs-ui/ui/switch';
-import type { EventRoom, RoomManagerAction } from '@/types/roomManager';
+import type { EventRoom, EventGroup, RoomManagerAction } from '@/types/roomManager';
 
 interface GroupPanelProps {
   eventRooms: EventRoom[];
+  groups: EventGroup[];
   roomName: string;
   onAction: (action: RoomManagerAction) => void;
+  onGroupClick?: (eventRoom: EventRoom) => void;
+  onMoveGroup?: (eventRoom: EventRoom) => void;
 }
 
-export default function GroupPanel({ eventRooms, roomName, onAction }: GroupPanelProps) {
+export default function GroupPanel({
+  eventRooms,
+  groups,
+  roomName,
+  onAction,
+  onGroupClick,
+  onMoveGroup,
+}: GroupPanelProps) {
+  // Build a Group_ID → Group_Name lookup from the groups dataset
+  const groupNameMap = new Map(groups.map((g) => [g.Group_ID, g.Group_Name]));
   // Track which fields have pending debounced saves
   const [pendingCapacity, setPendingCapacity] = useState<Record<number, number | null>>({});
   const [pendingPriority, setPendingPriority] = useState<Record<number, number | null>>({});
@@ -71,20 +83,43 @@ export default function GroupPanel({ eventRooms, roomName, onAction }: GroupPane
             : er.Balance_Priority;
 
         return (
-          <div key={er.Event_Room_ID} className="space-y-3 p-4">
-            {/* Group Name + Loading */}
+          <div
+            key={er.Event_Room_ID}
+            className={`space-y-3 p-4 ${onGroupClick ? 'hover:bg-muted/50 cursor-pointer transition-colors' : ''}`}
+            onClick={() => onGroupClick?.(er)}
+          >
+            {/* Group Name + Loading + Move */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-foreground text-sm font-medium">
-                  {er.Group_Name || `Group ${er.Group_ID}`}
+                  {er.Group_Name || groupNameMap.get(er.Group_ID!) || `Group ${er.Group_ID}`}
                 </span>
                 {er._loading && <Loader2 className="text-primary h-3 w-3 animate-spin" />}
               </div>
-              <span className="text-muted-foreground text-xs">{er.Checked_In} checked in</span>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-xs">{er.Checked_In} checked in</span>
+                {onMoveGroup && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMoveGroup(er);
+                    }}
+                    className="text-primary hover:bg-muted flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium transition-all active:scale-95"
+                    title="Move group to another room"
+                  >
+                    <ArrowRightLeft className="h-3 w-3" />
+                    Move
+                  </button>
+                )}
+                {onGroupClick && (
+                  <ChevronRight className="text-muted-foreground h-4 w-4 shrink-0" />
+                )}
+              </div>
             </div>
 
             {/* Toggles */}
-            <div className="flex flex-wrap gap-4">
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div className="flex flex-wrap gap-4" onClick={(e) => e.stopPropagation()}>
               <label className="flex items-center gap-2 text-xs">
                 <Switch
                   checked={er.Closed}
@@ -115,7 +150,8 @@ export default function GroupPanel({ eventRooms, roomName, onAction }: GroupPane
             </div>
 
             {/* Number Inputs */}
-            <div className="flex gap-4">
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+            <div className="flex gap-4" onClick={(e) => e.stopPropagation()}>
               <div className="flex-1">
                 <label className="text-muted-foreground mb-1 block text-xs">
                   Check-in Capacity

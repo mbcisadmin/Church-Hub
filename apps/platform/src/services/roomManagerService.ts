@@ -100,6 +100,7 @@ export async function updateEventRoom(
     Auto_Close_At_Capacity: boolean;
     Check_In_Capacity: number | null;
     Balance_Priority: number | null;
+    Room_ID: number;
   }>,
   userId: number
 ): Promise<void> {

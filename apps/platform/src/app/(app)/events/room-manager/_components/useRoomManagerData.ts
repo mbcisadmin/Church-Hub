@@ -225,6 +225,27 @@ export function useRoomManagerData(eventId: number | null) {
           );
           break;
         }
+        case 'moveGroup': {
+          const targetRoom = data.rooms.find((r) => r.Room_ID === action.newRoomId);
+          setData((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  eventRooms: prev.eventRooms.map((er) =>
+                    er.Event_Room_ID === action.eventRoomId
+                      ? {
+                          ...er,
+                          Room_ID: action.newRoomId,
+                          Room_Name: targetRoom?.Room_Name ?? er.Room_Name,
+                          _loading: true,
+                        }
+                      : er
+                  ),
+                }
+              : prev
+          );
+          break;
+        }
       }
 
       // Execute the action
