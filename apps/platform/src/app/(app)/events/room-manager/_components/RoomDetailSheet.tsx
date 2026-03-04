@@ -586,19 +586,42 @@ function HouseholdSkeleton() {
 // Group navigation bar (shown above people list on main page)
 // ---------------------------------------------------------------------------
 
+// Sentinel EventRoom for "unassigned" participants
+export const UNASSIGNED_ER: EventRoom = {
+  Event_Room_ID: -1,
+  Event_ID: 0,
+  Room_ID: 0,
+  Room_Name: '',
+  Group_ID: null,
+  Group_Name: 'Unassigned',
+  Closed: false,
+  Auto_Close_At_Capacity: false,
+  Check_In_Capacity: null,
+  Balance_Priority: null,
+  Checked_In: 0,
+};
+
 function GroupNavBar({
   eventRooms,
+  participants,
   groups,
   onSelectGroup,
 }: {
   eventRooms: EventRoom[];
+  participants: EventParticipant[];
   groups: EventGroup[];
   onSelectGroup: (er: EventRoom) => void;
 }) {
   const { navigate } = useResponsiveSheet();
   const groupNameMap = new Map(groups.map((g) => [g.Group_ID, g.Group_Name]));
 
-  if (eventRooms.length === 0) return null;
+  // Count unassigned (no group or group not in any EventRoom)
+  const eventRoomGroupIds = new Set(eventRooms.map((er) => er.Group_ID).filter(Boolean));
+  const unassignedCount = participants.filter(
+    (p) => p.Time_in && !p.Time_Out && (p.Group_ID === null || !eventRoomGroupIds.has(p.Group_ID))
+  ).length;
+
+  if (eventRooms.length === 0 && unassignedCount === 0) return null;
 
   return (
     <div className="border-border border-b px-4 py-3 md:px-6">
@@ -624,6 +647,19 @@ function GroupNavBar({
             </button>
           );
         })}
+        {unassignedCount > 0 && (
+          <button
+            onClick={() => {
+              onSelectGroup(UNASSIGNED_ER);
+              navigate('group-people');
+            }}
+            className="bg-muted hover:bg-muted/80 text-muted-foreground flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium italic transition-all active:scale-95"
+          >
+            Unassigned
+            <span>({unassignedCount})</span>
+            <ChevronRight className="h-3 w-3" />
+          </button>
+        )}
       </div>
     </div>
   );
@@ -662,21 +698,30 @@ export default function RoomDetailSheet({
   if (!room) return null;
 
   // Resolve group name
+  const isUnassigned = selectedGroupER?.Event_Room_ID === -1;
   const resolvedGroupName = selectedGroupER
-    ? (selectedGroupER.Group_Name ??
-      groups.find((g) => g.Group_ID === selectedGroupER.Group_ID)?.Group_Name ??
-      null)
+    ? isUnassigned
+      ? 'Unassigned'
+      : (selectedGroupER.Group_Name ??
+        groups.find((g) => g.Group_ID === selectedGroupER.Group_ID)?.Group_Name ??
+        null)
     : null;
 
   // Filter participants for selected group
+  const eventRoomGroupIds = new Set(eventRooms.map((er) => er.Group_ID).filter(Boolean));
   const groupParticipants = selectedGroupER
-    ? participants.filter((p) => {
-        if (selectedGroupER.Group_ID != null && p.Group_ID != null) {
-          return p.Group_ID === selectedGroupER.Group_ID;
-        }
-        if (resolvedGroupName) return p.Group_Name === resolvedGroupName;
-        return p.Group_Name === null;
-      })
+    ? isUnassigned
+      ? participants.filter(
+          (p) =>
+            p.Time_in && !p.Time_Out && (p.Group_ID === null || !eventRoomGroupIds.has(p.Group_ID))
+        )
+      : participants.filter((p) => {
+          if (selectedGroupER.Group_ID != null && p.Group_ID != null) {
+            return p.Group_ID === selectedGroupER.Group_ID;
+          }
+          if (resolvedGroupName) return p.Group_Name === resolvedGroupName;
+          return p.Group_Name === null;
+        })
     : [];
 
   const firstName = selectedPerson
@@ -702,7 +747,12 @@ export default function RoomDetailSheet({
       }
     >
       <SheetPage name="main">
-        <GroupNavBar eventRooms={eventRooms} groups={groups} onSelectGroup={setSelectedGroupER} />
+        <GroupNavBar
+          eventRooms={eventRooms}
+          participants={participants}
+          groups={groups}
+          onSelectGroup={setSelectedGroupER}
+        />
         <PeoplePanelWithNav
           participants={participants}
           rooms={allRooms}

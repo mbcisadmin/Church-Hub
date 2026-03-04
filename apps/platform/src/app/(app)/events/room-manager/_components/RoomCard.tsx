@@ -1,8 +1,16 @@
 'use client';
 
-import { Loader2, Lock, Users, User, ArrowRightLeft } from 'lucide-react';
-import { Switch } from '@church/nextjs-ui/ui/switch';
-import { Button } from '@/components/ui/button';
+import {
+  Loader2,
+  XCircle,
+  CheckCircle2,
+  ChevronRight,
+  Users,
+  User,
+  ArrowRightLeft,
+} from 'lucide-react';
+
+import { UNASSIGNED_ER } from './RoomDetailSheet';
 import type {
   Room,
   EventRoom,
@@ -36,16 +44,16 @@ export default function RoomCard({
   onMoveGroup,
   onGroupClick,
 }: RoomCardProps) {
-  const checkedIn = participants.filter((p) => p.Time_in && !p.Time_Out).length;
+  const activeParticipants = participants.filter((p) => p.Time_in && !p.Time_Out);
+  const volunteers = activeParticipants.filter(
+    (p) => p.Group_Role_Type_ID === 1 || p.Group_Role_Type_ID === 3
+  ).length;
+  const attendees = activeParticipants.length - volunteers;
   const maxCapacity = room.Maximum_Capacity;
-  const percentage = maxCapacity ? Math.min((checkedIn / maxCapacity) * 100, 100) : 0;
+  const percentage = maxCapacity ? Math.min((attendees / maxCapacity) * 100, 100) : 0;
 
   const openGroups = eventRooms.filter((er) => !er.Closed).length;
-
-  const volunteers = participants.filter(
-    (p) => p.Time_in && !p.Time_Out && p.Group_Role_ID !== null
-  ).length;
-  const attendees = checkedIn - volunteers;
+  const closedGroups = eventRooms.filter((er) => er.Closed).length;
 
   // Capacity color
   const capacityColor =
@@ -94,7 +102,7 @@ export default function RoomCard({
         </div>
         <div className="mt-1 flex items-center justify-between">
           <span className={`text-xs font-semibold ${capacityTextColor}`}>
-            {checkedIn} / {maxCapacity ?? '—'}
+            {attendees} / {maxCapacity ?? '—'}
           </span>
           {maxCapacity ? (
             <span className="text-muted-foreground text-xs">{Math.round(percentage)}%</span>
@@ -102,8 +110,12 @@ export default function RoomCard({
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="flex items-center gap-3 px-3 pb-2">
+      {/* Stats + Room Actions */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div
+        className="flex items-center justify-between px-3 pb-2"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center gap-1 text-xs">
           <Users className="text-muted-foreground h-3 w-3" />
           <span className="text-foreground">{volunteers}</span>
@@ -111,79 +123,165 @@ export default function RoomCard({
           <User className="text-muted-foreground h-3 w-3" />
           <span className="text-foreground">{attendees}</span>
         </div>
+        {eventRooms.length > 0 && (
+          <div className="flex items-center gap-1">
+            {closedGroups > 0 && (
+              <button
+                onClick={() =>
+                  onAction(
+                    {
+                      type: 'openRoom',
+                      roomId: room.Room_ID!,
+                      eventRoomIds: eventRooms
+                        .filter((er) => er.Closed)
+                        .map((er) => er.Event_Room_ID),
+                    },
+                    `All groups in ${room.Room_Name} opened`
+                  )
+                }
+                className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-green-600 transition-all hover:bg-green-50 active:scale-95 dark:hover:bg-green-950"
+                title="Open all groups"
+              >
+                <CheckCircle2 className="h-3 w-3" />
+                Open All
+              </button>
+            )}
+            {openGroups > 0 && (
+              <button
+                onClick={() => onCloseAll()}
+                className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium text-red-500 transition-all hover:bg-red-50 active:scale-95 dark:hover:bg-red-950"
+                title="Close all groups"
+              >
+                <XCircle className="h-3 w-3" />
+                Close All
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Group rows */}
-      {eventRooms.length > 0 && (
-        <div className="border-border border-t">
-          {eventRooms.map((er) => {
+      {eventRooms.length > 0 &&
+        (() => {
+          const openERs = eventRooms.filter((er) => !er.Closed);
+          const closedERs = eventRooms.filter((er) => er.Closed);
+
+          // Count checked-in participants per group from the same source as the room total
+          const eventRoomGroupIds = new Set(eventRooms.map((er) => er.Group_ID).filter(Boolean));
+          const checkedInByGroup = new Map<number, number>();
+          let unassignedCount = 0;
+          for (const p of participants) {
+            if (!p.Time_in || p.Time_Out) continue;
+            if (p.Group_ID != null && eventRoomGroupIds.has(p.Group_ID)) {
+              checkedInByGroup.set(p.Group_ID, (checkedInByGroup.get(p.Group_ID) ?? 0) + 1);
+            } else {
+              // No group, or group not assigned to this room
+              unassignedCount++;
+            }
+          }
+
+          const renderRow = (er: EventRoom) => {
             const name = er.Group_Name || groupNameMap.get(er.Group_ID!) || `Group ${er.Group_ID}`;
+            const groupCheckedIn =
+              er.Group_ID != null ? (checkedInByGroup.get(er.Group_ID) ?? 0) : er.Checked_In;
             return (
               // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
               <div
                 key={er.Event_Room_ID}
-                className="border-border flex items-center gap-2 border-b px-3 py-1.5 last:border-b-0"
-                onClick={(e) => e.stopPropagation()}
+                className="border-border hover:bg-muted/50 flex cursor-pointer items-center gap-2 border-b px-3 py-1.5 transition-colors last:border-b-0"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onGroupClick(er);
+                }}
               >
-                {/* Close toggle */}
-                <Switch
-                  checked={er.Closed}
-                  onCheckedChange={(checked) =>
-                    onAction({
-                      type: 'toggleClosed',
-                      eventRoomId: er.Event_Room_ID,
-                      closed: !!checked,
-                    })
-                  }
-                  className="scale-75"
-                />
-
-                {/* Group name - clickable to view people */}
-                <button
-                  onClick={() => onGroupClick(er)}
-                  className="hover:bg-muted/50 flex min-w-0 flex-1 items-center gap-1.5 rounded py-0.5 text-left transition-colors"
-                >
-                  {er.Closed && <Lock className="h-2.5 w-2.5 shrink-0 text-red-400" />}
-                  <span
-                    className={`truncate text-xs ${er.Closed ? 'text-muted-foreground line-through' : 'text-foreground'}`}
-                  >
-                    {name}
-                  </span>
-                </button>
+                {/* Group name */}
+                <span className="text-foreground min-w-0 flex-1 truncate text-xs">{name}</span>
 
                 {/* Checked in count */}
-                <span className="text-muted-foreground shrink-0 text-xs">{er.Checked_In}</span>
+                <span className="text-muted-foreground shrink-0 text-xs">{groupCheckedIn}</span>
 
                 {/* Move button */}
                 <button
-                  onClick={() => onMoveGroup(er)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMoveGroup(er);
+                  }}
                   className="text-primary hover:bg-muted shrink-0 rounded p-0.5 transition-all active:scale-90"
                   title="Move group"
                 >
                   <ArrowRightLeft className="h-3 w-3" />
                 </button>
+
+                {/* Close/Open toggle */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAction({
+                      type: 'toggleClosed',
+                      eventRoomId: er.Event_Room_ID,
+                      closed: !er.Closed,
+                    });
+                  }}
+                  className={`shrink-0 rounded p-0.5 transition-all active:scale-90 ${
+                    er.Closed
+                      ? 'text-green-600 hover:bg-green-50 dark:hover:bg-green-950'
+                      : 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950'
+                  }`}
+                  title={er.Closed ? 'Open group' : 'Close group'}
+                >
+                  {er.Closed ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <XCircle className="h-3 w-3" />
+                  )}
+                </button>
+
+                {/* Chevron */}
+                <ChevronRight className="text-muted-foreground h-3 w-3 shrink-0" />
               </div>
             );
-          })}
-        </div>
-      )}
+          };
 
-      {/* Actions */}
-      {eventRooms.length > 0 && openGroups > 0 && (
-        <div className="border-border flex items-center gap-1 border-t px-2 py-1.5">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-              onCloseAll();
-            }}
-            className="text-destructive hover:text-destructive h-7 rounded-none text-xs"
-          >
-            Close All
-          </Button>
-        </div>
-      )}
+          return (
+            <div className="border-border border-t">
+              {openERs.length > 0 && (
+                <>
+                  <div className="bg-muted/30 px-3 py-1 text-[10px] font-semibold tracking-wider text-green-600 uppercase">
+                    Open ({openERs.length})
+                  </div>
+                  {openERs.map(renderRow)}
+                </>
+              )}
+              {closedERs.length > 0 && (
+                <>
+                  <div className="bg-muted/30 border-border border-t px-3 py-1 text-[10px] font-semibold tracking-wider text-red-500 uppercase">
+                    Closed ({closedERs.length})
+                  </div>
+                  {closedERs.map(renderRow)}
+                </>
+              )}
+              {unassignedCount > 0 && (
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                <div
+                  className="border-border hover:bg-muted/50 flex cursor-pointer items-center gap-2 border-t px-3 py-1.5 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onGroupClick(UNASSIGNED_ER);
+                  }}
+                >
+                  <span className="text-muted-foreground min-w-0 flex-1 truncate text-xs italic">
+                    Unassigned
+                  </span>
+                  <span className="text-muted-foreground shrink-0 text-xs">{unassignedCount}</span>
+                  <ChevronRight className="text-muted-foreground h-3 w-3 shrink-0" />
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+      {/* spacer when no groups */}
+      {eventRooms.length === 0 && <div className="pb-1" />}
     </div>
   );
 }
