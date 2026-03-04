@@ -85,6 +85,7 @@ function RoomManagerContent() {
   // Room detail sheet state
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const [roomSheetOpen, setRoomSheetOpen] = useState(false);
+  const [initialGroupER, setInitialGroupER] = useState<EventRoom | null>(null);
 
   // MoveGroupSheet state
   const [moveGroupEventRoom, setMoveGroupEventRoom] = useState<EventRoom | null>(null);
@@ -96,6 +97,13 @@ function RoomManagerContent() {
 
   const handleRoomClick = useCallback((room: Room) => {
     setSelectedRoom(room);
+    setInitialGroupER(null);
+    setRoomSheetOpen(true);
+  }, []);
+
+  const handleGroupClick = useCallback((room: Room, eventRoom: EventRoom) => {
+    setSelectedRoom(room);
+    setInitialGroupER(eventRoom);
     setRoomSheetOpen(true);
   }, []);
 
@@ -187,9 +195,13 @@ function RoomManagerContent() {
                     room={room}
                     eventRooms={eventRoomsByRoom.get(room.Room_ID!) ?? []}
                     participants={participantsByRoom.get(room.Room_ID!) ?? []}
+                    groups={data?.groups ?? []}
                     highlighted={selectedRoom?.Room_ID === room.Room_ID && roomSheetOpen}
                     onClick={() => handleRoomClick(room)}
                     onCloseAll={() => handleCloseAllInRoom(room.Room_ID!)}
+                    onAction={executeAction}
+                    onMoveGroup={handleMoveGroup}
+                    onGroupClick={(er) => handleGroupClick(room, er)}
                   />
                 ))}
               </div>
@@ -213,7 +225,7 @@ function RoomManagerContent() {
         groups={data?.groups ?? []}
         allRooms={data?.rooms ?? []}
         onAction={executeAction}
-        onMoveGroup={handleMoveGroup}
+        initialGroupER={initialGroupER}
       />
 
       <MoveGroupSheet

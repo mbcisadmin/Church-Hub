@@ -1,32 +1,46 @@
 'use client';
 
-import { Loader2, Lock, Unlock, Users, User } from 'lucide-react';
+import { Loader2, Lock, Users, User, ArrowRightLeft } from 'lucide-react';
+import { Switch } from '@church/nextjs-ui/ui/switch';
 import { Button } from '@/components/ui/button';
-import type { Room, EventRoom, EventParticipant } from '@/types/roomManager';
+import type {
+  Room,
+  EventRoom,
+  EventParticipant,
+  EventGroup,
+  RoomManagerAction,
+} from '@/types/roomManager';
 
 interface RoomCardProps {
   room: Room;
   eventRooms: EventRoom[];
   participants: EventParticipant[];
+  groups: EventGroup[];
   highlighted: boolean;
   onClick: () => void;
   onCloseAll: () => void;
+  onAction: (action: RoomManagerAction, successMessage?: string) => void;
+  onMoveGroup: (eventRoom: EventRoom) => void;
+  onGroupClick: (eventRoom: EventRoom) => void;
 }
 
 export default function RoomCard({
   room,
   eventRooms,
   participants,
+  groups,
   highlighted,
   onClick,
   onCloseAll,
+  onAction,
+  onMoveGroup,
+  onGroupClick,
 }: RoomCardProps) {
   const checkedIn = participants.filter((p) => p.Time_in && !p.Time_Out).length;
   const maxCapacity = room.Maximum_Capacity;
   const percentage = maxCapacity ? Math.min((checkedIn / maxCapacity) * 100, 100) : 0;
 
   const openGroups = eventRooms.filter((er) => !er.Closed).length;
-  const closedGroups = eventRooms.filter((er) => er.Closed).length;
 
   const volunteers = participants.filter(
     (p) => p.Time_in && !p.Time_Out && p.Group_Role_ID !== null
@@ -40,6 +54,9 @@ export default function RoomCard({
     percentage >= 90 ? 'text-red-600' : percentage >= 75 ? 'text-amber-600' : 'text-green-600';
 
   const isAnyLoading = eventRooms.some((er) => er._loading);
+
+  // Group name lookup
+  const groupNameMap = new Map(groups.map((g) => [g.Group_ID, g.Group_Name]));
 
   return (
     <div
@@ -79,9 +96,9 @@ export default function RoomCard({
           <span className={`text-xs font-semibold ${capacityTextColor}`}>
             {checkedIn} / {maxCapacity ?? '—'}
           </span>
-          {maxCapacity && (
+          {maxCapacity ? (
             <span className="text-muted-foreground text-xs">{Math.round(percentage)}%</span>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -94,17 +111,62 @@ export default function RoomCard({
           <User className="text-muted-foreground h-3 w-3" />
           <span className="text-foreground">{attendees}</span>
         </div>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="flex items-center gap-0.5">
-            <Unlock className="h-3 w-3 text-green-500" />
-            <span className="text-foreground">{openGroups}</span>
-          </span>
-          <span className="flex items-center gap-0.5">
-            <Lock className="h-3 w-3 text-red-400" />
-            <span className="text-foreground">{closedGroups}</span>
-          </span>
-        </div>
       </div>
+
+      {/* Group rows */}
+      {eventRooms.length > 0 && (
+        <div className="border-border border-t">
+          {eventRooms.map((er) => {
+            const name = er.Group_Name || groupNameMap.get(er.Group_ID!) || `Group ${er.Group_ID}`;
+            return (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+              <div
+                key={er.Event_Room_ID}
+                className="border-border flex items-center gap-2 border-b px-3 py-1.5 last:border-b-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close toggle */}
+                <Switch
+                  checked={er.Closed}
+                  onCheckedChange={(checked) =>
+                    onAction({
+                      type: 'toggleClosed',
+                      eventRoomId: er.Event_Room_ID,
+                      closed: !!checked,
+                    })
+                  }
+                  className="scale-75"
+                />
+
+                {/* Group name - clickable to view people */}
+                <button
+                  onClick={() => onGroupClick(er)}
+                  className="hover:bg-muted/50 flex min-w-0 flex-1 items-center gap-1.5 rounded py-0.5 text-left transition-colors"
+                >
+                  {er.Closed && <Lock className="h-2.5 w-2.5 shrink-0 text-red-400" />}
+                  <span
+                    className={`truncate text-xs ${er.Closed ? 'text-muted-foreground line-through' : 'text-foreground'}`}
+                  >
+                    {name}
+                  </span>
+                </button>
+
+                {/* Checked in count */}
+                <span className="text-muted-foreground shrink-0 text-xs">{er.Checked_In}</span>
+
+                {/* Move button */}
+                <button
+                  onClick={() => onMoveGroup(er)}
+                  className="text-primary hover:bg-muted shrink-0 rounded p-0.5 transition-all active:scale-90"
+                  title="Move group"
+                >
+                  <ArrowRightLeft className="h-3 w-3" />
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Actions */}
       {eventRooms.length > 0 && openGroups > 0 && (

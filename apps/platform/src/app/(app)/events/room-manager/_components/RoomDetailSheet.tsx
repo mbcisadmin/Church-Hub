@@ -22,7 +22,6 @@ import {
   SheetPage,
   useResponsiveSheet,
 } from '@church/nextjs-ui/components/ResponsiveSheet';
-import GroupPanel from './GroupPanel';
 import PeoplePanel from './PeoplePanel';
 import type {
   Room,
@@ -34,8 +33,6 @@ import type {
 import type { HouseholdWithMembersResponse, HouseholdMember } from '@/services/peopleSearchService';
 
 const FILE_URL = process.env.NEXT_PUBLIC_MINISTRY_PLATFORM_FILE_URL;
-
-type PageName = 'groups' | 'people';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -92,7 +89,7 @@ interface RoomDetailSheetProps {
   groups: EventGroup[];
   allRooms: Room[];
   onAction: (action: RoomManagerAction, successMessage?: string) => void;
-  onMoveGroup: (eventRoom: EventRoom) => void;
+  initialGroupER: EventRoom | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,18 +98,12 @@ interface RoomDetailSheetProps {
 
 function RoomDetailHeader({
   room,
-  eventRooms,
   participants,
-  activePage,
-  onNavigate,
   selectedGroupName,
   selectedPerson,
 }: {
   room: Room;
-  eventRooms: EventRoom[];
   participants: EventParticipant[];
-  activePage: PageName;
-  onNavigate: (page: PageName) => void;
   selectedGroupName: string | null;
   selectedPerson: EventParticipant | null;
 }) {
@@ -179,35 +170,12 @@ function RoomDetailHeader({
         {isGroupPeoplePage && selectedGroupName ? (
           <p className="mt-1 text-sm text-white/70">{selectedGroupName}</p>
         ) : (
-          subtitle && <p className="mt-1 text-sm text-white/70">{subtitle}</p>
+          <>
+            {subtitle && <p className="mt-1 text-sm text-white/70">{subtitle}</p>}
+            <p className="mt-1 text-sm text-white/70">{checkedIn} checked in</p>
+          </>
         )}
       </div>
-      {!isGroupPeoplePage && (
-        <div className="relative z-10 mt-4 flex gap-2">
-          <button
-            onClick={() => onNavigate('groups')}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              activePage === 'groups'
-                ? 'text-primary bg-white'
-                : 'bg-white/20 text-white hover:bg-white/30'
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            Groups ({eventRooms.length})
-          </button>
-          <button
-            onClick={() => onNavigate('people')}
-            className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              activePage === 'people'
-                ? 'text-primary bg-white'
-                : 'bg-white/20 text-white hover:bg-white/30'
-            }`}
-          >
-            <User className="h-3.5 w-3.5" />
-            People ({checkedIn})
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -272,7 +240,6 @@ function PersonDetailPage({
   person,
   rooms,
   onAction,
-  onClose,
 }: {
   person: EventParticipant;
   rooms: Room[];
@@ -341,7 +308,6 @@ function PersonDetailPage({
             </div>
           ) : null;
         })()}
-        {/* Link to people search */}
         {person.Contact_ID && (
           <button
             onClick={() => router.push(`/people/search?contactId=${person.Contact_ID}`)}
@@ -486,7 +452,7 @@ function PersonMoveRoomPage({
 }
 
 // ---------------------------------------------------------------------------
-// Household helpers (moved from PersonDetailSheet)
+// Household helpers
 // ---------------------------------------------------------------------------
 
 const POSITION_ORDER = ['Head of Household', 'Spouse', 'Child', 'Other'];
@@ -617,6 +583,53 @@ function HouseholdSkeleton() {
 }
 
 // ---------------------------------------------------------------------------
+// Group navigation bar (shown above people list on main page)
+// ---------------------------------------------------------------------------
+
+function GroupNavBar({
+  eventRooms,
+  groups,
+  onSelectGroup,
+}: {
+  eventRooms: EventRoom[];
+  groups: EventGroup[];
+  onSelectGroup: (er: EventRoom) => void;
+}) {
+  const { navigate } = useResponsiveSheet();
+  const groupNameMap = new Map(groups.map((g) => [g.Group_ID, g.Group_Name]));
+
+  if (eventRooms.length === 0) return null;
+
+  return (
+    <div className="border-border border-b px-4 py-3 md:px-6">
+      <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
+        <Users className="h-3.5 w-3.5" />
+        Groups
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {eventRooms.map((er) => {
+          const name = er.Group_Name || groupNameMap.get(er.Group_ID!) || `Group ${er.Group_ID}`;
+          return (
+            <button
+              key={er.Event_Room_ID}
+              onClick={() => {
+                onSelectGroup(er);
+                navigate('group-people');
+              }}
+              className="bg-muted hover:bg-muted/80 text-foreground flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all active:scale-95"
+            >
+              {name}
+              <span className="text-muted-foreground">({er.Checked_In})</span>
+              <ChevronRight className="text-muted-foreground h-3 w-3" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main Sheet
 // ---------------------------------------------------------------------------
 
@@ -629,20 +642,22 @@ export default function RoomDetailSheet({
   groups,
   allRooms,
   onAction,
-  onMoveGroup,
+  initialGroupER,
 }: RoomDetailSheetProps) {
-  const [activePage, setActivePage] = useState<PageName>('groups');
   const [selectedGroupER, setSelectedGroupER] = useState<EventRoom | null>(null);
   const [selectedPerson, setSelectedPerson] = useState<EventParticipant | null>(null);
+
+  // defaultPage: 'main' for all people, 'group-people' when drilling into a group
+  // ResponsiveSheet seeds history as ['main', 'group-people'] so back → main
+  const defaultPage = initialGroupER ? 'group-people' : 'main';
 
   // Reset state when opening a new room
   useEffect(() => {
     if (open) {
-      setActivePage('groups');
-      setSelectedGroupER(null);
+      setSelectedGroupER(initialGroupER);
       setSelectedPerson(null);
     }
-  }, [open, room?.Room_ID]);
+  }, [open, room?.Room_ID, initialGroupER]);
 
   if (!room) return null;
 
@@ -676,31 +691,18 @@ export default function RoomDetailSheet({
       panelClassName="bg-card overflow-hidden"
       maxWidth="max-w-5xl"
       noPanelPadding
-      defaultPage={activePage}
+      defaultPage={defaultPage}
       header={
         <RoomDetailHeader
           room={room}
-          eventRooms={eventRooms}
           participants={participants}
-          activePage={activePage}
-          onNavigate={setActivePage}
           selectedGroupName={resolvedGroupName}
           selectedPerson={selectedPerson}
         />
       }
     >
-      <SheetPage name="groups">
-        <GroupPanelWithNav
-          eventRooms={eventRooms}
-          groups={groups}
-          roomName={room.Room_Name}
-          onAction={onAction}
-          onMoveGroup={onMoveGroup}
-          onSelectGroup={setSelectedGroupER}
-          onSelectPerson={setSelectedPerson}
-        />
-      </SheetPage>
-      <SheetPage name="people">
+      <SheetPage name="main">
+        <GroupNavBar eventRooms={eventRooms} groups={groups} onSelectGroup={setSelectedGroupER} />
         <PeoplePanelWithNav
           participants={participants}
           rooms={allRooms}
@@ -737,44 +739,6 @@ export default function RoomDetailSheet({
         )}
       </SheetPage>
     </ResponsiveSheet>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Wrapper: GroupPanel with navigation
-// ---------------------------------------------------------------------------
-
-function GroupPanelWithNav({
-  eventRooms,
-  groups,
-  roomName,
-  onAction,
-  onMoveGroup,
-  onSelectGroup,
-  onSelectPerson,
-}: {
-  eventRooms: EventRoom[];
-  groups: EventGroup[];
-  roomName: string;
-  onAction: (action: RoomManagerAction, successMessage?: string) => void;
-  onMoveGroup: (eventRoom: EventRoom) => void;
-  onSelectGroup: (eventRoom: EventRoom) => void;
-  onSelectPerson: (person: EventParticipant) => void;
-}) {
-  const { navigate } = useResponsiveSheet();
-
-  return (
-    <GroupPanel
-      eventRooms={eventRooms}
-      groups={groups}
-      roomName={roomName}
-      onAction={onAction}
-      onMoveGroup={onMoveGroup}
-      onGroupClick={(er) => {
-        onSelectGroup(er);
-        navigate('group-people');
-      }}
-    />
   );
 }
 
