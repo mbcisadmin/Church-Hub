@@ -59,7 +59,7 @@
     var(--brand-primary-dark) 100%
   );
 
-  --background: oklch(1 0 0);
+  --background: oklch(0.96 0.003 136);
   --foreground: var(--brand-secondary);
   --card: oklch(1 0 0);
   --card-foreground: var(--brand-secondary);
@@ -94,7 +94,7 @@
 }
 
 .dark {
-  --background: oklch(0.21 0 0); /* Dark gray body */
+  --background: oklch(0.15 0.005 145);
   --foreground: oklch(0.93 0 0);
   --card: oklch(0.16 0 0); /* Darker than body — cards pop with shadow */
   --card-foreground: oklch(0.93 0 0);
