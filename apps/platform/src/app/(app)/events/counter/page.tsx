@@ -26,6 +26,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { SectionHeader } from '@/components/ui/section-header';
 import { useCampus } from '@/contexts/CampusContext';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
 
@@ -296,6 +297,15 @@ export default function CounterPage() {
   useEffect(() => {
     document.title = 'Counter | The Hub';
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'counter',
+    resultTitle: 'Counter',
+    resultSubtitle: 'Events',
+    resultRoute: '/events/counter',
+    resultIcon: 'hash',
+  });
 
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);

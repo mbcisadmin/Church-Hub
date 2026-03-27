@@ -1,8 +1,10 @@
 import { eq, and, or, inArray } from 'drizzle-orm';
 import { db } from '../client';
 import {
+  categories,
   applications,
   appPermissions,
+  type Category,
   type Application,
   type AppPermission,
 } from '../schemas/applications';
@@ -198,6 +200,31 @@ export async function getAllApplications(includeInactive = false): Promise<Appli
     .from(applications)
     .where(eq(applications.isActive, true))
     .orderBy(applications.sortOrder);
+}
+
+/**
+ * Get all active categories with their accessible applications
+ */
+export async function getNavigationData(
+  userRoles: string[],
+  userEmail: string | null,
+  isAdmin: boolean
+): Promise<(Category & { apps: (Application & { permission: PermissionResult })[] })[]> {
+  // Get all active categories
+  const allCategories = await db
+    .select()
+    .from(categories)
+    .where(eq(categories.isActive, true))
+    .orderBy(categories.sortOrder);
+
+  // Get all accessible apps
+  const accessibleApps = await getAccessibleApplications(userRoles, userEmail, isAdmin);
+
+  // Group apps by category
+  return allCategories.map((cat) => ({
+    ...cat,
+    apps: accessibleApps.filter((app) => app.categoryId === cat.id),
+  }));
 }
 
 /**

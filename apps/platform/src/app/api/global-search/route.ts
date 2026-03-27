@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@church/nextjs-auth';
+import { getAccessibleApplications, getAllApplications } from '@church/database/neon';
 import type {
   GlobalSearchResponse,
   GlobalSearchResult,
@@ -9,54 +10,52 @@ import type {
 } from '@/types/globalSearch';
 
 /**
- * Hardcoded app registry - will be replaced with database lookup later
+ * Build the searchable apps list from Neon database.
+ * Apps with a known search endpoint get `searchable: true`.
  */
-const APPS: SearchableApp[] = [
-  {
-    key: 'people-search',
-    name: 'People Search',
-    description: 'Search and view contact information',
-    icon: 'search',
-    route: '/people/search',
-    type: 'app',
-    searchable: true,
-    search_endpoint: '/api/people-search/global-search',
-  },
-  {
-    key: 'counter',
-    name: 'Counter',
-    description: 'Event attendance and metrics tracking',
-    icon: 'calculator',
-    route: '/events/counter',
-    type: 'app',
-    searchable: false,
-    search_endpoint: null,
-  },
-  {
-    key: 'circles',
-    name: 'Circles',
-    description: 'Engagement circles analytics and metrics',
-    icon: 'pie-chart',
-    route: '/analytics/dashboards/circles',
-    type: 'dashboard',
-    searchable: false,
-    search_endpoint: null,
-  },
-];
+const SEARCH_ENDPOINTS: Record<string, string> = {
+  'people-search': '/api/people-search/global-search',
+};
+
+function toSearchableApp(app: {
+  key: string;
+  name: string;
+  description: string | null;
+  icon: string | null;
+  route: string;
+  type: 'app' | 'dashboard';
+}): SearchableApp {
+  const endpoint = SEARCH_ENDPOINTS[app.key] || null;
+  return {
+    key: app.key,
+    name: app.name,
+    description: app.description || '',
+    icon: app.icon || 'circle',
+    route: app.route,
+    type: app.type,
+    searchable: !!endpoint,
+    search_endpoint: endpoint,
+  };
+}
 
 /**
  * Find apps/dashboards that match the query by name (case-insensitive contains)
  */
-function findMatchingApps(query: string): { apps: AppNameMatch[]; dashboards: AppNameMatch[] } {
+function findMatchingApps(
+  apps: SearchableApp[],
+  query: string
+): { apps: AppNameMatch[]; dashboards: AppNameMatch[] } {
   const lowerQuery = query.toLowerCase();
-  const matches = APPS.filter((app) => app.name.toLowerCase().includes(lowerQuery)).map((app) => ({
-    key: app.key,
-    name: app.name,
-    description: app.description,
-    icon: app.icon,
-    route: app.route,
-    type: app.type,
-  }));
+  const matches = apps
+    .filter((app) => app.name.toLowerCase().includes(lowerQuery))
+    .map((app) => ({
+      key: app.key,
+      name: app.name,
+      description: app.description,
+      icon: app.icon,
+      route: app.route,
+      type: app.type,
+    }));
 
   return {
     apps: matches.filter((m) => m.type === 'app'),
@@ -113,7 +112,7 @@ async function searchAppContent(
 /**
  * Global Search Orchestrator
  *
- * Searches across all registered apps:
+ * Searches across all registered apps from Neon:
  * 1. Finds apps matching by name
  * 2. Calls each searchable app's endpoint in parallel
  * 3. Aggregates results
@@ -133,25 +132,45 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Query must be at least 2 characters' }, { status: 400 });
     }
 
+    // Get accessible apps from Neon (respects permissions + is_active)
+    const hasNoRoleData = !session.isAdmin && (!session.roles || session.roles.length === 0);
+
+    let dbApps;
+    if (hasNoRoleData) {
+      dbApps = (await getAllApplications()).map((app) => ({
+        ...app,
+        permission: {
+          hasAccess: true,
+          canView: true,
+          canEdit: true,
+          canDelete: true,
+          reason: 'admin' as const,
+        },
+      }));
+    } else {
+      dbApps = await getAccessibleApplications(
+        session.roles || [],
+        session.email || null,
+        session.isAdmin
+      );
+    }
+
+    const apps = dbApps.map(toSearchableApp);
+
     // Get base URL for internal API calls
     const baseUrl = request.nextUrl.origin;
-
-    // Get cookies to pass auth context to internal endpoints
     const cookies = request.headers.get('cookie') || '';
 
     // Find apps and dashboards matching by name
-    const { apps: matchingApps, dashboards: matchingDashboards } = findMatchingApps(query);
+    const { apps: matchingApps, dashboards: matchingDashboards } = findMatchingApps(apps, query);
 
     // Get searchable apps and call their endpoints in parallel
-    const searchableApps = APPS.filter((app) => app.searchable && app.search_endpoint);
+    const searchableApps = apps.filter((app) => app.searchable && app.search_endpoint);
 
-    const contentResultsPromises = searchableApps.map((app) =>
-      searchAppContent(app, query, baseUrl, cookies)
+    const contentResultsRaw = await Promise.all(
+      searchableApps.map((app) => searchAppContent(app, query, baseUrl, cookies))
     );
 
-    const contentResultsRaw = await Promise.all(contentResultsPromises);
-
-    // Filter out null results (failed searches)
     const contentResults = contentResultsRaw.filter(
       (result): result is AppContentResults => result !== null
     );

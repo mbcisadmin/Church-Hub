@@ -32,6 +32,7 @@ import LogoSpinner from '@church/nextjs-ui/components/LogoSpinner';
 import ChurchLogo from '@/components/ChurchLogo';
 import { useTestingContext } from '@/components/TestingParamsProvider';
 import { usePreserveParams } from '@/lib/usePreserveParams';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 import { churchConfig } from '@/config/church';
 
 // Mock giving summary data
@@ -253,6 +254,14 @@ export default function GivingPage() {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'giving',
+    resultTitle: 'Giving',
+    resultRoute: '/giving',
+    resultIcon: 'heart',
+  });
 
   // Get apps based on access level
   const personalApps = accessLevel === 'low' ? GIVING_APPS.slice(0, 3) : GIVING_APPS;

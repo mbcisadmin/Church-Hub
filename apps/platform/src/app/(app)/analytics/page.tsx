@@ -9,6 +9,7 @@ import { DashboardCard } from '@church/nextjs-ui/components/DashboardCard';
 import { AppCard } from '@church/nextjs-ui/components/AppCard';
 import { HorizontalScroll } from '@church/nextjs-ui/components/HorizontalScroll';
 import { usePreserveParams } from '@/lib/usePreserveParams';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 const DASHBOARDS = [
   {
@@ -28,6 +29,14 @@ export default function AnalyticsPage() {
   useEffect(() => {
     document.title = 'Analytics | The Hub';
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'analytics',
+    resultTitle: 'Analytics',
+    resultRoute: '/analytics',
+    resultIcon: 'bar-chart-3',
+  });
 
   return (
     <div className="flex flex-col gap-6">

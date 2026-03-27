@@ -25,6 +25,7 @@ import { RotatingSubtitle } from '@/components/RotatingSubtitle';
 import { useTabReady } from './TabReadyProvider';
 import { getOverTimeData } from '../_data/actions';
 import type { OverTimeData } from '../_data/types';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 type Tab = 'over-time' | 'current' | 'milestones';
 
@@ -53,6 +54,13 @@ export default function CirclesDashboard({
   const [isPending, startTransition] = useTransition();
   const { resolvedTheme } = useTheme();
   const { isReady, setActiveTab: setContextActiveTab } = useTabReady();
+
+  useTrackPageVisit({
+    resultType: 'dashboard',
+    resultId: 'circles',
+    resultTitle: 'Circles',
+    resultRoute: '/analytics/dashboards/circles',
+  });
 
   // Sync Chart.js default text color with current theme
   useEffect(() => {

@@ -11,6 +11,7 @@ import RoomDetailSheet from './_components/RoomDetailSheet';
 import MoveGroupSheet from './_components/MoveGroupSheet';
 import { useRoomManagerData } from './_components/useRoomManagerData';
 import type { EventParticipant, EventRoom, Room } from '@/types/roomManager';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 // ---------------------------------------------------------------------------
 // Main Page
@@ -31,6 +32,15 @@ function RoomManagerContent() {
   useEffect(() => {
     document.title = 'Room Manager | The Hub';
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'room-manager',
+    resultTitle: 'Room Manager',
+    resultSubtitle: 'Events',
+    resultRoute: '/events/room-manager',
+    resultIcon: 'door-open',
+  });
 
   // ---------------------------------------------------------------------------
   // URL-synced state

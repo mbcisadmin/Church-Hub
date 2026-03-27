@@ -15,6 +15,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 type Contact = {
   Contact_ID: number;
@@ -114,6 +115,19 @@ export default function ContactDetailPage() {
 
     loadContact();
   }, [contactId]);
+
+  useTrackPageVisit(
+    contact
+      ? {
+          resultType: 'person',
+          resultId: String(contact.Contact_ID),
+          resultTitle: contact.Display_Name,
+          resultSubtitle: contact.Email_Address || undefined,
+          resultRoute: `/people/search/${contact.Contact_ID}`,
+          resultImageUrl: contact.Image_GUID || undefined,
+        }
+      : null
+  );
 
   const getImageUrl = (imageGuidOrUrl: string | null | undefined) => {
     if (!imageGuidOrUrl) return null;

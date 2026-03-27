@@ -34,6 +34,7 @@ import LogoSpinner from '@church/nextjs-ui/components/LogoSpinner';
 import ChurchLogo from '@/components/ChurchLogo';
 import { useTestingContext } from '@/components/TestingParamsProvider';
 import { usePreserveParams } from '@/lib/usePreserveParams';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 // Mock serving teams
 interface ServingTeam {
@@ -348,6 +349,14 @@ export default function ServePage() {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'serve',
+    resultTitle: 'Serve',
+    resultRoute: '/serve',
+    resultIcon: 'handshake',
+  });
 
   // Get teams based on access level
   const myTeams =

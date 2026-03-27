@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@church/nextjs-auth';
-import { db, searchHistory } from '@church/database';
+import { db, searchHistory, applications, categories } from '@church/database';
 import { eq, desc } from 'drizzle-orm';
 import { getAccessibleApplications } from '@church/database/neon';
 
@@ -9,9 +9,7 @@ const MAX_HISTORY_ITEMS = 10;
 /**
  * GET /api/search/history
  * Returns the user's recent search history, filtered against current permissions.
- *
- * Apps and dashboards are filtered against current permissions.
- * Other result types (people, etc.) are returned as-is.
+ * Enriches app/dashboard entries with category info from Neon.
  */
 export async function GET() {
   try {
@@ -33,7 +31,7 @@ export async function GET() {
       .from(searchHistory)
       .where(eq(searchHistory.contactId, contactId))
       .orderBy(desc(searchHistory.clickedAt))
-      .limit(MAX_HISTORY_ITEMS * 2); // Fetch extra in case some get filtered
+      .limit(MAX_HISTORY_ITEMS * 2);
 
     if (history.length === 0) {
       return NextResponse.json({ history: [] });
@@ -45,7 +43,6 @@ export async function GET() {
     let accessibleRoutes: Set<string>;
 
     if (hasNoRoleData) {
-      // Show all if no role data
       accessibleRoutes = new Set(history.map((h) => h.resultRoute));
     } else {
       const accessibleApps = await getAccessibleApplications(
@@ -56,30 +53,53 @@ export async function GET() {
       accessibleRoutes = new Set(accessibleApps.map((app) => app.route));
     }
 
-    // Filter history:
-    // - Apps/dashboards: Only show if user still has access
-    // - Other types (people, etc.): Always show
+    // Get all apps with their category info for enrichment
+    const appsWithCategories = await db
+      .select({
+        appRoute: applications.route,
+        appIcon: applications.icon,
+        appName: applications.name,
+        categoryName: categories.name,
+        categoryIcon: categories.icon,
+      })
+      .from(applications)
+      .leftJoin(categories, eq(applications.categoryId, categories.id))
+      .where(eq(applications.isActive, true));
+
+    const appLookup = new Map(appsWithCategories.map((a) => [a.appRoute, a]));
+    const knownAppRoutes = new Set(appsWithCategories.map((a) => a.appRoute));
+
+    // Filter history
     const filteredHistory = history
       .filter((entry) => {
         if (entry.resultType === 'app' || entry.resultType === 'dashboard') {
-          return accessibleRoutes.has(entry.resultRoute);
+          if (knownAppRoutes.has(entry.resultRoute)) {
+            return accessibleRoutes.has(entry.resultRoute);
+          }
+          return true;
         }
-        return true; // Non-app results are always shown
+        return true;
       })
       .slice(0, MAX_HISTORY_ITEMS);
 
     return NextResponse.json({
-      history: filteredHistory.map((entry) => ({
-        id: entry.id,
-        type: entry.resultType,
-        resultId: entry.resultId,
-        title: entry.resultTitle,
-        subtitle: entry.resultSubtitle,
-        route: entry.resultRoute,
-        icon: entry.resultIcon,
-        imageUrl: entry.resultImageUrl,
-        clickedAt: entry.clickedAt,
-      })),
+      history: filteredHistory.map((entry) => {
+        const appInfo = appLookup.get(entry.resultRoute);
+        return {
+          id: entry.id,
+          type: entry.resultType,
+          resultId: entry.resultId,
+          title: entry.resultTitle,
+          subtitle: entry.resultSubtitle,
+          route: entry.resultRoute,
+          icon: entry.resultIcon,
+          imageUrl: entry.resultImageUrl,
+          clickedAt: entry.clickedAt,
+          // Category info from Neon (only for registered apps)
+          categoryName: appInfo?.categoryName || null,
+          categoryIcon: appInfo?.categoryIcon || null,
+        };
+      }),
     });
   } catch (error) {
     console.error('Search history error:', error);

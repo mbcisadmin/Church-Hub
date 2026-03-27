@@ -25,6 +25,7 @@ import {
   useResponsiveSheet,
 } from '@church/nextjs-ui/components/ResponsiveSheet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 
 type Contact = {
   Contact_ID: number;
@@ -250,6 +251,15 @@ function PeopleSearchContent() {
   useEffect(() => {
     document.title = 'People Search - The Hub';
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'people-search',
+    resultTitle: 'People Search',
+    resultSubtitle: 'People',
+    resultRoute: '/people/search',
+    resultIcon: 'search',
+  });
 
   // Debounced search function
   const performSearch = useCallback(async (query: string, skip: number = 0) => {

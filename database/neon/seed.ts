@@ -4,6 +4,7 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import {
+  categories,
   applications,
   appPermissions,
 } from '../../packages/core/database/src/neon/schemas/applications';
@@ -14,6 +15,71 @@ const db = drizzle(sql);
 async function seed() {
   console.log('Seeding database...');
 
+  // Insert categories
+  const cats = await db
+    .insert(categories)
+    .values([
+      {
+        name: 'Events',
+        key: 'events',
+        icon: 'calendar-days',
+        route: '/events',
+        addActionUrl: 'https://my.mcleanbible.org/mp/308/0',
+        addActionLabel: 'New',
+        sortOrder: 1,
+      },
+      {
+        name: 'People',
+        key: 'people',
+        icon: 'contact',
+        route: '/people',
+        sortOrder: 2,
+      },
+      {
+        name: 'Groups',
+        key: 'groups',
+        icon: 'users-round',
+        route: 'https://my.mcleanbible.org/mp/322',
+        addActionUrl: 'https://my.mcleanbible.org/mp/322/0',
+        addActionLabel: 'New',
+        sortOrder: 3,
+      },
+      {
+        name: 'Giving',
+        key: 'giving',
+        icon: 'hand-coins',
+        route: 'https://mcleanbible.org/give/',
+        addActionUrl: 'https://mcleanbible.onlinegiving.org/donate',
+        addActionLabel: 'New',
+        sortOrder: 4,
+      },
+      {
+        name: 'Serve',
+        key: 'serve',
+        icon: 'handshake',
+        route: 'https://my.mcleanbible.org/mp/348',
+        addActionUrl: 'https://my.mcleanbible.org/mp/348/0',
+        addActionLabel: 'New',
+        sortOrder: 5,
+      },
+      {
+        name: 'Analytics',
+        key: 'analytics',
+        icon: 'bar-chart-3',
+        route: '/analytics',
+        sortOrder: 6,
+      },
+    ])
+    .returning();
+
+  console.log(
+    'Inserted categories:',
+    cats.map((c) => c.name)
+  );
+
+  const eventsCategory = cats.find((c) => c.key === 'events')!;
+  const peopleCategory = cats.find((c) => c.key === 'people')!;
+
   // Insert applications
   const apps = await db
     .insert(applications)
@@ -22,10 +88,23 @@ async function seed() {
         name: 'Counter',
         key: 'counter',
         type: 'app',
+        categoryId: eventsCategory.id,
         description: 'Event attendance and metrics tracking',
-        route: '/counter',
-        icon: 'calculator',
+        route: '/events/counter',
+        icon: 'hash',
         sortOrder: 1,
+        isActive: true,
+        requiresAuth: true,
+      },
+      {
+        name: 'Room Manager',
+        key: 'room-manager',
+        type: 'app',
+        categoryId: eventsCategory.id,
+        description: 'Manage event room assignments and check-ins',
+        route: '/events/room-manager',
+        icon: 'door-open',
+        sortOrder: 2,
         isActive: true,
         requiresAuth: true,
       },
@@ -33,20 +112,10 @@ async function seed() {
         name: 'People Search',
         key: 'people-search',
         type: 'app',
+        categoryId: peopleCategory.id,
         description: 'Search and view contact information',
-        route: '/people-search',
+        route: '/people',
         icon: 'search',
-        sortOrder: 2,
-        isActive: true,
-        requiresAuth: true,
-      },
-      {
-        name: 'Circles Dashboard',
-        key: 'circles',
-        type: 'dashboard',
-        description: 'Engagement circles analytics and metrics',
-        route: '/analytics/dashboards/circles',
-        icon: 'pie-chart',
         sortOrder: 1,
         isActive: true,
         requiresAuth: true,
@@ -59,41 +128,8 @@ async function seed() {
     apps.map((a) => a.name)
   );
 
-  // Get app IDs
-  const counterApp = apps.find((a) => a.key === 'counter')!;
-  const peopleSearchApp = apps.find((a) => a.key === 'people-search')!;
-  const circlesApp = apps.find((a) => a.key === 'circles')!;
-
-  // Insert permissions
-  // Note: Admins (isAdmin=true from security role) bypass these checks
-  // These permissions are for User Groups
-  const permissions = await db
-    .insert(appPermissions)
-    .values([
-      // CircleDashboard group gets access to Circles Dashboard
-      {
-        applicationId: circlesApp.id,
-        roleName: 'CircleDashboard',
-        canView: true,
-        canEdit: false,
-        canDelete: false,
-      },
-      // You can add more permissions here as needed
-      // Example: Counter access for a specific group
-      // {
-      //   applicationId: counterApp.id,
-      //   roleName: 'Counter Team',
-      //   canView: true,
-      //   canEdit: true,
-      //   canDelete: false,
-      // },
-    ])
-    .returning();
-
-  console.log('Inserted permissions:', permissions.length);
   console.log('\nSeed complete!');
   console.log('\nNote: Admins (isAdmin=true) have access to all apps by default.');
-  console.log('The permissions table is for granting access to specific User Groups.');
 }
 
 seed().catch(console.error);

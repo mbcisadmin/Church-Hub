@@ -14,6 +14,7 @@ import ChurchLogo from '@/components/ChurchLogo';
 import { useRegisterPageActions, DesktopActionBar } from '@church/nextjs-ui/page-actions';
 import { useTestingContext } from '@/components/TestingParamsProvider';
 import { usePreserveParams } from '@/lib/usePreserveParams';
+import { useTrackPageVisit } from '@/lib/useTrackPageVisit';
 import { getPinnedGroupsForLevel, type PinnedGroup } from '@/lib/mockData';
 
 // Extended group type with more details
@@ -343,6 +344,14 @@ export default function GroupsPage() {
     const timer = setTimeout(() => setLoading(false), 300);
     return () => clearTimeout(timer);
   }, []);
+
+  useTrackPageVisit({
+    resultType: 'app',
+    resultId: 'groups',
+    resultTitle: 'Groups',
+    resultRoute: '/groups',
+    resultIcon: 'users',
+  });
 
   // Get groups based on access level
   const myGroups = getPinnedGroupsForLevel(accessLevel);
