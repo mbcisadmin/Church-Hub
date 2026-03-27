@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Search, Menu, Mail, MessageCircle, MapPin, ChevronDown } from 'lucide-react';
+import { Search, Menu, MapPin, ChevronDown } from 'lucide-react';
 import { QuickActions } from '@church/nextjs-ui/components/QuickActions';
 import ChurchLogo from '@/components/ChurchLogo';
 import CampusSheet from '@/components/CampusSheet';
@@ -92,21 +92,7 @@ export default function AppHeader() {
           {/* Right — Quick Actions + Avatar */}
           <div className="flex items-center justify-end gap-2">
             <QuickActions
-              actions={[
-                { icon: Search, label: 'Search', onClick: () => setSearchSheetOpen(true) },
-                {
-                  icon: Mail,
-                  label: 'Email',
-                  onClick: () => router.push(buildUrl('/email')),
-                  isActive: pathname.startsWith('/email'),
-                },
-                {
-                  icon: MessageCircle,
-                  label: 'Text',
-                  onClick: () => router.push(buildUrl('/text')),
-                  isActive: pathname.startsWith('/text'),
-                },
-              ]}
+              actions={[{ icon: Search, label: 'Search', onClick: () => setSearchSheetOpen(true) }]}
             />
             <div
               data-profile-avatar
@@ -160,7 +146,7 @@ export default function AppHeader() {
           {/* Campus selector */}
           <CampusTrigger onClick={() => setCampusSheetOpen(true)} />
 
-          {/* Quick actions: Search, Messages, Text */}
+          {/* Quick actions: Search */}
           <div className="ml-2 flex items-center gap-1">
             {[
               {
@@ -168,18 +154,6 @@ export default function AppHeader() {
                 label: 'Search',
                 onClick: () => setSearchSheetOpen(true),
                 isActive: false,
-              },
-              {
-                icon: Mail,
-                label: 'Messages',
-                onClick: () => router.push(buildUrl('/email')),
-                isActive: pathname.startsWith('/email'),
-              },
-              {
-                icon: MessageCircle,
-                label: 'Text',
-                onClick: () => router.push(buildUrl('/text')),
-                isActive: pathname.startsWith('/text'),
               },
             ].map((action) => {
               const Icon = action.icon;

@@ -13,9 +13,9 @@ import {
   CalendarDays,
   Clock,
   AlertCircle,
-  ChevronRight,
 } from 'lucide-react';
-import { ActionCard } from '@church/nextjs-ui/components/ActionCard';
+import { BaseCard } from '@church/nextjs-ui/components/BaseCard';
+import { HorizontalScroll } from '@church/nextjs-ui/components/HorizontalScroll';
 import { DateSwiper } from '@church/nextjs-ui/date-swiper';
 import { SwipeableCounter } from '@church/nextjs-ui/swipeable-counter';
 import {
@@ -311,6 +311,7 @@ export default function CounterPage() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<Metric | null>(null);
   const [count, setCount] = useState(0);
+  const [eventFilter, setEventFilter] = useState('');
 
   const [events, setEvents] = useState<Event[]>([]);
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -646,6 +647,7 @@ export default function CounterPage() {
                 onChange={(newDate) => {
                   setSelectedDate(newDate);
                   setSelectedEvent(null);
+                  setEventFilter('');
                   setIsSheetOpen(false);
                 }}
                 showArch
@@ -673,49 +675,68 @@ export default function CounterPage() {
                     No events found for this date
                   </div>
                 ) : (
-                  <div ref={eventListRef} className="flex flex-col gap-2">
-                    {events.map((event) => {
-                      const isSelected = selectedEvent?.Event_ID === event.Event_ID;
-                      const isLoading = isSelected && isLoadingExistingMetrics;
-                      return (
-                        <ActionCard
-                          key={event.Event_ID}
-                          onClick={() => handleEventClick(event)}
-                          className={
-                            isLoadingMetrics
-                              ? 'cursor-not-allowed opacity-50'
-                              : isSelected
-                                ? 'border-primary'
-                                : ''
-                          }
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p
-                              className={`text-sm ${isSelected ? 'text-primary font-medium' : 'text-foreground/80'}`}
-                            >
-                              {formatEventTitle(event.Event_Title)}
-                            </p>
-                            <div
-                              className={`mt-1 inline-flex items-center gap-1 text-xs ${
-                                isSelected ? 'text-primary/70' : 'text-muted-foreground'
-                              }`}
-                            >
-                              <Clock className="h-3 w-3" />
-                              {format(parseISO(event.Event_Start_Date), 'h:mm a')}
-                              {isLoading && <Loader2 className="ml-1 h-3 w-3 animate-spin" />}
-                            </div>
-                          </div>
-                          <ChevronRight
-                            className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1 ${
-                              isSelected
-                                ? 'text-primary'
-                                : 'text-muted-foreground group-hover:text-foreground'
-                            }`}
-                          />
-                        </ActionCard>
-                      );
-                    })}
-                  </div>
+                  <>
+                    {events.length > 5 && (
+                      <div className="relative mb-4">
+                        <input
+                          type="text"
+                          value={eventFilter}
+                          onChange={(e) => setEventFilter(e.target.value)}
+                          placeholder="Filter events..."
+                          className="border-border bg-card text-foreground placeholder:text-muted-foreground focus:border-primary h-10 w-full border px-3 text-sm focus:outline-none"
+                        />
+                      </div>
+                    )}
+                    <div ref={eventListRef}>
+                      <HorizontalScroll>
+                        {events
+                          .filter((e) =>
+                            eventFilter.trim()
+                              ? e.Event_Title.toLowerCase().includes(eventFilter.toLowerCase())
+                              : true
+                          )
+                          .map((event) => {
+                            const isSelected = selectedEvent?.Event_ID === event.Event_ID;
+                            const isLoading = isSelected && isLoadingExistingMetrics;
+                            return (
+                              <BaseCard
+                                key={event.Event_ID}
+                                onClick={() => handleEventClick(event)}
+                                className={`justify-center ${
+                                  isLoadingMetrics
+                                    ? 'cursor-not-allowed opacity-50'
+                                    : isSelected
+                                      ? 'border-primary'
+                                      : ''
+                                }`}
+                              >
+                                <CalendarDays className="absolute right-1 bottom-1 h-14 w-14 text-[#e8e8e8] dark:text-[#2a2a2a]" />
+                                {isLoading && (
+                                  <Loader2 className="text-primary absolute top-2 right-2 h-4 w-4 animate-spin" />
+                                )}
+                                <div className="relative z-10 w-full text-center">
+                                  <p
+                                    className={`line-clamp-2 text-xs leading-tight font-bold tracking-wide uppercase ${
+                                      isSelected ? 'text-primary' : 'text-foreground'
+                                    }`}
+                                  >
+                                    {formatEventTitle(event.Event_Title)}
+                                  </p>
+                                  <p
+                                    className={`mt-1 flex items-center justify-center gap-1 text-[10px] ${
+                                      isSelected ? 'text-primary/70' : 'text-muted-foreground'
+                                    }`}
+                                  >
+                                    <Clock className="h-3 w-3" />
+                                    {format(parseISO(event.Event_Start_Date), 'h:mm a')}
+                                  </p>
+                                </div>
+                              </BaseCard>
+                            );
+                          })}
+                      </HorizontalScroll>
+                    </div>
+                  </>
                 )}
               </motion.div>
             )}
