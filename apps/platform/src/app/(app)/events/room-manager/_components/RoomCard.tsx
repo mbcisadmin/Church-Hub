@@ -18,6 +18,73 @@ import type {
   RoomManagerAction,
 } from '@/types/roomManager';
 
+function CapacityGauge({
+  leaders,
+  attendees,
+  maxCapacity,
+  capacityTextColor,
+}: {
+  leaders: number;
+  attendees: number;
+  maxCapacity: number | null;
+  capacityTextColor: string;
+}) {
+  const circumference = 94.25; // 2 * PI * 15
+  const totalCheckedIn = leaders + attendees;
+  const leaderPct = maxCapacity ? Math.min((leaders / maxCapacity) * 100, 100) : 0;
+  const attendeePct = maxCapacity ? Math.min((attendees / maxCapacity) * 100, 100) : 0;
+  const leaderDash = (leaderPct / 100) * circumference;
+  const attendeeDash = (attendeePct / 100) * circumference;
+
+  return (
+    <div className="relative h-11 w-11 shrink-0">
+      <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+        <circle
+          cx="18"
+          cy="18"
+          r="15"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          className="text-muted/40"
+        />
+        {attendees > 0 && (
+          <circle
+            cx="18"
+            cy="18"
+            r="15"
+            fill="none"
+            stroke="#22c55e"
+            strokeWidth="3"
+            strokeDasharray={`${attendeeDash} ${circumference - attendeeDash}`}
+            strokeDashoffset={-leaderDash}
+            strokeLinecap="round"
+            className="transition-all duration-500"
+          />
+        )}
+        {leaders > 0 && (
+          <circle
+            cx="18"
+            cy="18"
+            r="15"
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="3"
+            strokeDasharray={`${leaderDash} ${circumference - leaderDash}`}
+            strokeLinecap="round"
+            className="transition-all duration-500"
+          />
+        )}
+      </svg>
+      <span
+        className={`absolute inset-0 flex items-center justify-center text-[9px] font-bold ${capacityTextColor}`}
+      >
+        {totalCheckedIn}/{maxCapacity ?? '—'}
+      </span>
+    </div>
+  );
+}
+
 interface RoomCardProps {
   room: Room;
   eventRooms: EventRoom[];
@@ -87,7 +154,6 @@ export default function RoomCard({
       <div className="flex items-start justify-between p-3 pb-2">
         <div className="min-w-0 flex-1 pt-1">
           <div className="flex items-center gap-1.5">
-            {isVolunteerRoom && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-blue-500" />}
             <h3 className="text-foreground truncate text-sm font-semibold">{room.Room_Name}</h3>
             {isAnyLoading && <Loader2 className="text-primary h-3 w-3 animate-spin" />}
           </div>
@@ -96,64 +162,17 @@ export default function RoomCard({
           )}
         </div>
 
-        {/* Circle gauge — top right */}
-        {(() => {
-          const circumference = 94.25; // 2 * PI * 15
-          const leaderPct = maxCapacity ? Math.min((leaders / maxCapacity) * 100, 100) : 0;
-          const attendeePct = maxCapacity ? Math.min((attendees / maxCapacity) * 100, 100) : 0;
-          const leaderDash = (leaderPct / 100) * circumference;
-          const attendeeDash = (attendeePct / 100) * circumference;
-          return (
-            <div className="relative h-11 w-11 shrink-0">
-              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
-                {/* Background circle */}
-                <circle
-                  cx="18"
-                  cy="18"
-                  r="15"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  className="text-muted/40"
-                />
-                {/* Attendees segment (green, starts after leaders) */}
-                {attendees > 0 && (
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke="#22c55e"
-                    strokeWidth="3"
-                    strokeDasharray={`${attendeeDash} ${circumference - attendeeDash}`}
-                    strokeDashoffset={-leaderDash}
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                )}
-                {/* Leaders segment (blue, starts at 0) */}
-                {leaders > 0 && (
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15"
-                    fill="none"
-                    stroke="#3b82f6"
-                    strokeWidth="3"
-                    strokeDasharray={`${leaderDash} ${circumference - leaderDash}`}
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                )}
-              </svg>
-              <span
-                className={`absolute inset-0 flex items-center justify-center text-[9px] font-bold ${capacityTextColor}`}
-              >
-                {totalCheckedIn}/{maxCapacity ?? '—'}
-              </span>
-            </div>
-          );
-        })()}
+        {/* Top right: shield for volunteer rooms, circle gauge otherwise */}
+        {isVolunteerRoom ? (
+          <ShieldCheck className="mt-1 h-8 w-8 shrink-0 text-blue-500" />
+        ) : (
+          <CapacityGauge
+            leaders={leaders}
+            attendees={attendees}
+            maxCapacity={maxCapacity}
+            capacityTextColor={capacityTextColor}
+          />
+        )}
       </div>
 
       {/* Group rows */}
