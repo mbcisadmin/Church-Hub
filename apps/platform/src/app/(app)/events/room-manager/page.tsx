@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { format } from 'date-fns';
-import { DoorOpen, Loader2 } from 'lucide-react';
+import { DoorOpen, Loader2, Search, X } from 'lucide-react';
 import { SectionHeader } from '@/components/ui/section-header';
 import RoomManagerHeader from './_components/RoomManagerHeader';
 import RoomCard from './_components/RoomCard';
@@ -91,6 +91,7 @@ function RoomManagerContent() {
 
   // Data
   const { data, isLoading, error, executeAction } = useRoomManagerData(selectedEventId);
+  const [roomSearch, setRoomSearch] = useState('');
 
   // Room detail sheet state
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -144,9 +145,28 @@ function RoomManagerContent() {
   // Derived data for room cards
   // ---------------------------------------------------------------------------
 
+  const eventRoomsByRoom = new Map<number, EventRoom[]>();
+  for (const er of data?.eventRooms ?? []) {
+    if (!eventRoomsByRoom.has(er.Room_ID)) eventRoomsByRoom.set(er.Room_ID, []);
+    eventRoomsByRoom.get(er.Room_ID)!.push(er);
+  }
+
+  // Check if a room is a volunteer room (room-level flag or all its event rooms are volunteer groups)
+  const isVolunteerRoom = (r: Room) => {
+    if (r.Volunteer_Group) return true;
+    const ers = eventRoomsByRoom.get(r.Room_ID!) ?? [];
+    return ers.length > 0 && ers.every((er) => er.Volunteer_Group);
+  };
+
   const sortedRooms = (data?.rooms ?? [])
     .filter((r) => r.Room_ID !== null)
-    .sort((a, b) => (a.Room_Name ?? '').localeCompare(b.Room_Name ?? ''));
+    .sort((a, b) => {
+      const aVol = isVolunteerRoom(a);
+      const bVol = isVolunteerRoom(b);
+      if (aVol && !bVol) return -1;
+      if (!aVol && bVol) return 1;
+      return (a.Room_Name ?? '').localeCompare(b.Room_Name ?? '');
+    });
 
   const participantsByRoom = new Map<number, EventParticipant[]>();
   for (const p of data?.participants ?? []) {
@@ -155,11 +175,28 @@ function RoomManagerContent() {
     participantsByRoom.get(p.Room_ID)!.push(p);
   }
 
-  const eventRoomsByRoom = new Map<number, EventRoom[]>();
-  for (const er of data?.eventRooms ?? []) {
-    if (!eventRoomsByRoom.has(er.Room_ID)) eventRoomsByRoom.set(er.Room_ID, []);
-    eventRoomsByRoom.get(er.Room_ID)!.push(er);
-  }
+  // Group name lookup for search (same as RoomCard uses)
+  const groupNameMap = new Map((data?.groups ?? []).map((g) => [g.Group_ID, g.Group_Name]));
+
+  // Filter rooms by search query (room name, group names, participant names)
+  const filteredRooms = roomSearch.trim()
+    ? sortedRooms.filter((room) => {
+        const q = roomSearch.toLowerCase();
+        if (room.Room_Name.toLowerCase().includes(q)) return true;
+        if (room.Building_Name?.toLowerCase().includes(q)) return true;
+        const ers = eventRoomsByRoom.get(room.Room_ID!) ?? [];
+        if (
+          ers.some((er) => {
+            const name = er.Group_Name || groupNameMap.get(er.Group_ID!) || '';
+            return name.toLowerCase().includes(q);
+          })
+        )
+          return true;
+        const ps = participantsByRoom.get(room.Room_ID!) ?? [];
+        if (ps.some((p) => p.Display_Name.toLowerCase().includes(q))) return true;
+        return false;
+      })
+    : sortedRooms;
 
   const selectedRoomEventRooms = selectedRoom?.Room_ID
     ? (eventRoomsByRoom.get(selectedRoom.Room_ID) ?? [])
@@ -198,23 +235,55 @@ function RoomManagerContent() {
             {error && <div className="text-destructive py-8 text-center text-sm">{error}</div>}
 
             {data && !isLoading && selectedEventId && sortedRooms.length > 0 && (
-              <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-                {sortedRooms.map((room) => (
-                  <RoomCard
-                    key={room.Room_ID}
-                    room={room}
-                    eventRooms={eventRoomsByRoom.get(room.Room_ID!) ?? []}
-                    participants={participantsByRoom.get(room.Room_ID!) ?? []}
-                    groups={data?.groups ?? []}
-                    highlighted={selectedRoom?.Room_ID === room.Room_ID && roomSheetOpen}
-                    onClick={() => handleRoomClick(room)}
-                    onCloseAll={() => handleCloseAllInRoom(room.Room_ID!)}
-                    onAction={executeAction}
-                    onMoveGroup={handleMoveGroup}
-                    onGroupClick={(er) => handleGroupClick(room, er)}
+              <>
+                <div className="relative mb-3">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <Search className="text-muted-foreground h-4 w-4" />
+                  </div>
+                  <input
+                    type="text"
+                    value={roomSearch}
+                    onChange={(e) => setRoomSearch(e.target.value)}
+                    placeholder="Search rooms, groups, or people..."
+                    className="border-border bg-card text-foreground placeholder:text-muted-foreground focus:border-primary h-10 w-full border pr-8 pl-9 text-sm focus:outline-none"
                   />
-                ))}
-              </div>
+                  {roomSearch && (
+                    <button
+                      onClick={() => setRoomSearch('')}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    >
+                      <X className="text-muted-foreground hover:text-foreground h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="text-muted-foreground mb-3 flex items-center gap-4 text-[10px]">
+                  <span className="flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-[#3b82f6]" />
+                    Leaders
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="inline-block h-2 w-2 rounded-full bg-green-500" />
+                    Attendees
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+                  {filteredRooms.map((room) => (
+                    <RoomCard
+                      key={room.Room_ID}
+                      room={room}
+                      eventRooms={eventRoomsByRoom.get(room.Room_ID!) ?? []}
+                      participants={participantsByRoom.get(room.Room_ID!) ?? []}
+                      groups={data?.groups ?? []}
+                      highlighted={selectedRoom?.Room_ID === room.Room_ID && roomSheetOpen}
+                      onClick={() => handleRoomClick(room)}
+                      onCloseAll={() => handleCloseAllInRoom(room.Room_ID!)}
+                      onAction={executeAction}
+                      onMoveGroup={handleMoveGroup}
+                      onGroupClick={(er) => handleGroupClick(room, er)}
+                    />
+                  ))}
+                </div>
+              </>
             )}
 
             {!selectedEventId && !isLoading && (

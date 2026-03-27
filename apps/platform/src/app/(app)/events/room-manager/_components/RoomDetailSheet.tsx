@@ -12,6 +12,7 @@ import {
   LogOut,
   MapPin,
   RotateCcw,
+  Settings2,
   Sparkles,
   User,
   Users,
@@ -599,6 +600,7 @@ export const UNASSIGNED_ER: EventRoom = {
   Check_In_Capacity: null,
   Balance_Priority: null,
   Checked_In: 0,
+  Volunteer_Group: false,
 };
 
 function GroupNavBar({
@@ -660,6 +662,122 @@ function GroupNavBar({
             <ChevronRight className="h-3 w-3" />
           </button>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Group Settings (shown at top of group-people page)
+// ---------------------------------------------------------------------------
+
+function GroupSettings({
+  eventRoom,
+  onAction,
+}: {
+  eventRoom: EventRoom;
+  onAction: (action: RoomManagerAction, successMessage?: string) => void;
+}) {
+  if (eventRoom.Event_Room_ID === -1) return null; // unassigned
+
+  const groupName = eventRoom.Group_Name || 'Group';
+
+  return (
+    <div className="border-border border-b px-4 py-3 md:px-6">
+      <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-xs font-medium tracking-wider uppercase">
+        <Settings2 className="h-3.5 w-3.5" />
+        Settings
+      </p>
+      <div className="space-y-2">
+        {/* Closed toggle */}
+        <div className="flex items-center justify-between">
+          <span className="text-foreground text-sm">Closed</span>
+          <button
+            onClick={() =>
+              onAction(
+                {
+                  type: 'toggleClosed',
+                  eventRoomId: eventRoom.Event_Room_ID,
+                  closed: !eventRoom.Closed,
+                },
+                `${groupName} ${eventRoom.Closed ? 'opened' : 'closed'}`
+              )
+            }
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              eventRoom.Closed ? 'bg-red-500' : 'bg-muted'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                eventRoom.Closed ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Auto close at capacity */}
+        <div className="flex items-center justify-between">
+          <span className="text-foreground text-sm">Auto-close at capacity</span>
+          <button
+            onClick={() =>
+              onAction(
+                {
+                  type: 'toggleAutoClose',
+                  eventRoomId: eventRoom.Event_Room_ID,
+                  autoClose: !eventRoom.Auto_Close_At_Capacity,
+                },
+                `Auto-close ${eventRoom.Auto_Close_At_Capacity ? 'disabled' : 'enabled'} for ${groupName}`
+              )
+            }
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              eventRoom.Auto_Close_At_Capacity ? 'bg-primary' : 'bg-muted'
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                eventRoom.Auto_Close_At_Capacity ? 'translate-x-5' : ''
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Check-in capacity */}
+        <div className="flex items-center justify-between">
+          <span className="text-foreground text-sm">Check-in capacity</span>
+          <input
+            type="number"
+            value={eventRoom.Check_In_Capacity ?? ''}
+            placeholder="—"
+            min={0}
+            onChange={(e) => {
+              const val = e.target.value ? parseInt(e.target.value, 10) : null;
+              onAction(
+                { type: 'setCheckInCapacity', eventRoomId: eventRoom.Event_Room_ID, capacity: val },
+                `Check-in capacity set to ${val ?? 'unlimited'} for ${groupName}`
+              );
+            }}
+            className="border-border bg-background text-foreground focus:border-primary h-8 w-20 border px-2 text-right text-sm focus:outline-none"
+          />
+        </div>
+
+        {/* Balance priority */}
+        <div className="flex items-center justify-between">
+          <span className="text-foreground text-sm">Balance priority</span>
+          <input
+            type="number"
+            value={eventRoom.Balance_Priority ?? ''}
+            placeholder="—"
+            min={0}
+            onChange={(e) => {
+              const val = e.target.value ? parseInt(e.target.value, 10) : null;
+              onAction(
+                { type: 'setBalancePriority', eventRoomId: eventRoom.Event_Room_ID, priority: val },
+                `Balance priority set to ${val ?? 'none'} for ${groupName}`
+              );
+            }}
+            className="border-border bg-background text-foreground focus:border-primary h-8 w-20 border px-2 text-right text-sm focus:outline-none"
+          />
+        </div>
       </div>
     </div>
   );
@@ -765,6 +883,7 @@ export default function RoomDetailSheet({
         name="group-people"
         title={resolvedGroupName ?? `Group ${selectedGroupER?.Group_ID ?? ''}`}
       >
+        {selectedGroupER && <GroupSettings eventRoom={selectedGroupER} onAction={onAction} />}
         <PeoplePanelWithNav
           participants={groupParticipants}
           rooms={allRooms}

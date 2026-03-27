@@ -39,11 +39,15 @@ export async function getRoomManagerData(eventId: number): Promise<RoomManagerDa
 
   return {
     event: events.length > 0 ? events[0] : null,
-    rooms,
+    rooms: rooms.map((r) => ({
+      ...r,
+      Volunteer_Group: !!(r as any).Volunteer_Group,
+    })),
     eventRooms: eventRooms.map((er) => ({
       ...er,
       Closed: !!er.Closed,
       Auto_Close_At_Capacity: !!er.Auto_Close_At_Capacity,
+      Volunteer_Group: !!(er as any).Volunteer_Group,
     })),
     participants: enrichedParticipants,
     groups,

@@ -19,6 +19,7 @@ export interface Room {
   Building_ID: number | null;
   Building_Name: string | null;
   Still_Checked_In: number | null;
+  Volunteer_Group: boolean;
 }
 
 export interface EventRoom {
@@ -33,6 +34,7 @@ export interface EventRoom {
   Check_In_Capacity: number | null;
   Balance_Priority: number | null;
   Checked_In: number;
+  Volunteer_Group: boolean;
   _loading?: boolean;
 }
 
